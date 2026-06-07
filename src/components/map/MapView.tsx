@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Map, { Marker, NavigationControl, GeolocateControl } from "react-map-gl/mapbox";
-import type { GeolocateControlRef, MapRef } from "react-map-gl/mapbox";
+import type { MapRef } from "react-map-gl/mapbox";
 import useSWR from "swr";
 import { SlidersHorizontal, X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export function MapView({ initialPins }: MapViewProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPhotos, setShowPhotos] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const geolocateRef = useRef<GeolocateControlRef>(null);
+  const geolocateRef = useRef<React.ElementRef<typeof GeolocateControl>>(null);
   const mapRef = useRef<MapRef>(null);
 
   const handleMapLoad = useCallback(() => {
