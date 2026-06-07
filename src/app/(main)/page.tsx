@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LocationGrid } from "@/components/location/LocationGrid";
@@ -10,30 +11,51 @@ export default async function HomePage() {
 
   return (
     <div className="pb-16">
-      {/* Hero — sunny yellow background */}
-      <section className="bg-accent border-b-2 border-border py-16 sm:py-24 px-4">
-        <div className="container mx-auto max-w-3xl text-center space-y-6">
-          <div className="inline-flex items-center gap-2 bg-background border-2 border-border px-4 py-1.5 text-sm font-bold shadow-shadow-sm rounded-sm">
-            <Clapperboard className="h-4 w-4" />
-            Built for student filmmakers
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tighter leading-none">
-            Find Your Perfect<br />
-            <span className="text-primary">Filming Location</span>
-          </h1>
-          <p className="text-foreground/70 text-lg max-w-xl mx-auto font-medium">
-            Discover community-curated filming spots near you. Filter by hashtags, read tips from
-            fellow filmmakers, and share your own hidden gems.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/map" className={cn(buttonVariants({ size: "lg" }))}>
-              <MapPin className="h-4 w-4" />
-              Explore the Map
-            </Link>
-            <Link href="/add" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
-              <Plus className="h-4 w-4" />
-              Add a Location
-            </Link>
+      {/* Hero */}
+      <section className="bg-accent border-b-2 border-border px-4 py-12 sm:py-20">
+        <div className="container mx-auto max-w-5xl">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+
+            {/* Text side */}
+            <div className="flex-1 space-y-6 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 bg-background border-2 border-border px-4 py-1.5 text-sm font-bold shadow-shadow-sm rounded-sm">
+                <Clapperboard className="h-4 w-4" />
+                Built for student filmmakers
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">
+                Find Your Perfect<br />
+                <span className="text-primary">Filming Location</span>
+              </h1>
+              <p className="text-foreground/70 text-lg max-w-md font-medium">
+                Discover community-curated filming spots near you. Filter by hashtags, read tips from
+                fellow filmmakers, and share your own hidden gems.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                <Link href="/map" className={cn(buttonVariants({ size: "lg" }))}>
+                  <MapPin className="h-4 w-4" />
+                  Explore the Map
+                </Link>
+                <Link href="/add" className={cn(buttonVariants({ variant: "outline", size: "lg" }))}>
+                  <Plus className="h-4 w-4" />
+                  Add a Location
+                </Link>
+              </div>
+            </div>
+
+            {/* Illustration side */}
+            <div className="flex-shrink-0 w-56 sm:w-72 md:w-80">
+              <div className="relative border-2 border-border shadow-shadow rounded-lg overflow-hidden bg-background p-4">
+                <Image
+                  src="/scenescout-hero.svg"
+                  alt="SceneScout — film projector and map pin"
+                  width={320}
+                  height={320}
+                  className="w-full h-auto"
+                  priority
+                />
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -57,10 +79,7 @@ export default async function HomePage() {
             </div>
             <h2 className="text-2xl font-black">Trending This Week</h2>
           </div>
-          <Link
-            href="/locations"
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          >
+          <Link href="/locations" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
             View all →
           </Link>
         </div>
@@ -79,10 +98,7 @@ export default async function HomePage() {
             </div>
             <h2 className="text-2xl font-black">Highest Rated</h2>
           </div>
-          <Link
-            href="/locations"
-            className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-          >
+          <Link href="/locations" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
             View all →
           </Link>
         </div>
@@ -93,18 +109,29 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      {/* <section className="container mx-auto px-4 pt-8">
-        <div className="bg-secondary border-2 border-border shadow-shadow rounded-lg p-8 text-center space-y-4">
-          <h2 className="text-2xl font-black">Know a great spot?</h2>
-          <p className="text-foreground/70 font-medium max-w-md mx-auto">
-            Help the community by sharing your filming locations with hashtags, tips, and photos.
-          </p>
-          <Link href="/add" className={cn(buttonVariants({ size: "lg" }))}>
-            <Plus className="h-4 w-4" />
-            Add Your Location
-          </Link>
+      <section className="container mx-auto px-4 pt-8">
+        <div className="bg-secondary border-2 border-border shadow-shadow rounded-lg p-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <Image
+              src="/scenescout-icon.svg"
+              alt="SceneScout icon"
+              width={80}
+              height={80}
+              className="shrink-0"
+            />
+            <div className="flex-1 text-center sm:text-left space-y-2">
+              <h2 className="text-2xl font-black">Know a great spot?</h2>
+              <p className="text-foreground/70 font-medium">
+                Help the community by sharing your filming locations with hashtags, tips, and photos.
+              </p>
+            </div>
+            <Link href="/add" className={cn(buttonVariants({ size: "lg" }), "shrink-0")}>
+              <Plus className="h-4 w-4" />
+              Add Your Location
+            </Link>
+          </div>
         </div>
-      </section> */}
+      </section>
     </div>
   );
 }

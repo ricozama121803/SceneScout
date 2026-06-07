@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -7,9 +7,6 @@ export function Footer() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 font-black text-sm">
-            <div className="flex h-6 w-6 items-center justify-center rounded border-2 border-background bg-primary">
-              <MapPin className="h-3 w-3 text-primary-foreground" />
-            </div>
             SceneScout — built for student filmmakers
           </div>
 

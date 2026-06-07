@@ -2,7 +2,7 @@ import { signIn, signInWithOAuth } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Sign In" };
 
@@ -16,6 +16,10 @@ export default async function LoginPage({
   return (
     <div className="min-h-screen bg-accent flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-bold hover:underline">
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
         {/* Logo */}
         <div className="text-center">
           <Link
@@ -28,7 +32,7 @@ export default async function LoginPage({
             SceneScout
           </Link>
           <p className="text-muted-foreground text-sm font-medium">
-            Sign in to your account
+            Welcome back! Sign in to discover and share the newest filming locations today.
           </p>
         </div>
 
@@ -72,29 +76,29 @@ export default async function LoginPage({
             </Button>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t-2 border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-2 font-bold text-muted-foreground">
-                or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <form action={signInWithOAuth.bind(null, "google")}>
-              <Button variant="outline" className="w-full" type="submit">
-                Google
-              </Button>
-            </form>
-            <form action={signInWithOAuth.bind(null, "github")}>
-              <Button variant="outline" className="w-full" type="submit">
-                GitHub
-              </Button>
-            </form>
-          </div>
+          {/* <div className="relative"> */}
+            {/* <div className="absolute inset-0 flex items-center"> */}
+              {/* <div className="w-full border-t-2 border-border" /> */}
+            {/* </div> */}
+            {/* <div className="relative flex justify-center text-xs"> */}
+              {/* <span className="bg-card px-2 font-bold text-muted-foreground"> */}
+                {/* or continue with */}
+              {/* </span> */}
+            {/* </div> */}
+          {/* </div> */}
+{/*  */}
+          {/* <div className="grid grid-cols-2 gap-3"> */}
+            {/* <form action={signInWithOAuth.bind(null, "google")}> */}
+              {/* <Button variant="outline" className="w-full" type="submit"> */}
+                {/* Google */}
+              {/* </Button> */}
+            {/* </form> */}
+            {/* <form action={signInWithOAuth.bind(null, "github")}> */}
+              {/* <Button variant="outline" className="w-full" type="submit"> */}
+                {/* GitHub */}
+              {/* </Button> */}
+            {/* </form> */}
+          {/* </div> */}
         </div>
 
         <p className="text-center text-sm font-medium text-muted-foreground">

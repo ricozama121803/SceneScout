@@ -2,7 +2,7 @@ import { signUp } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { MapPin } from "lucide-react";
+import { MapPin, ArrowLeft } from "lucide-react";
 
 export const metadata = { title: "Sign Up" };
 
@@ -16,6 +16,10 @@ export default async function SignUpPage({
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm space-y-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-bold hover:underline">
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
         {/* Logo */}
         <div className="text-center">
           <Link
@@ -28,7 +32,7 @@ export default async function SignUpPage({
             SceneScout
           </Link>
           <p className="text-muted-foreground text-sm font-medium">
-            Create your filmmaker account
+            Sign up for SceneScout to discover and share filming locations near you.
           </p>
         </div>
 
