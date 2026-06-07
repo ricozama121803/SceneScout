@@ -4,18 +4,23 @@ import { MapPin } from "lucide-react";
 export function Footer() {
   return (
     <footer className="border-t-2 border-border bg-foreground text-background mt-auto">
-      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 font-black text-sm">
-          <div className="flex h-6 w-6 items-center justify-center rounded border-2 border-background bg-primary">
-            <MapPin className="h-3 w-3 text-primary-foreground" />
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 font-black text-sm">
+            <div className="flex h-6 w-6 items-center justify-center rounded border-2 border-background bg-primary">
+              <MapPin className="h-3 w-3 text-primary-foreground" />
+            </div>
+            SceneScout — built for student filmmakers
           </div>
-          SceneScout — built for student filmmakers
+
+          <p className="text-xs uppercase tracking-wide opacity-80">
+            Discover and share filming locations.
+          </p>
         </div>
-        <nav className="flex gap-6 text-sm font-bold">
-          <Link href="/map" className="hover:text-accent transition-colors">Map</Link>
-          <Link href="/locations" className="hover:text-accent transition-colors">Browse</Link>
-          <Link href="/add" className="hover:text-secondary transition-colors">Add Location</Link>
-        </nav>
+
+        <div className="mt-4 border-t-2 border-background/20 pt-4 text-center text-xs opacity-70">
+          © 2026 SceneScout. All rights reserved.
+        </div>
       </div>
     </footer>
   );

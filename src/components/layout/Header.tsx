@@ -2,8 +2,6 @@ import Link from "next/link";
 import { AuthButton } from "./AuthButton";
 import { MobileNav } from "./MobileNav";
 import { MapPin } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 export function Header() {
   return (
@@ -15,18 +13,6 @@ export function Header() {
           </div>
           SceneScout
         </Link>
-
-        <nav className="hidden md:flex items-center gap-1">
-          <Link href="/map" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
-            Map
-          </Link>
-          <Link href="/locations" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
-            Browse
-          </Link>
-          <Link href="/add" className={cn(buttonVariants({ size: "sm" }))}>
-            + Add Location
-          </Link>
-        </nav>
 
         <div className="flex items-center gap-2">
           <AuthButton />

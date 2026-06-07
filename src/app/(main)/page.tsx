@@ -93,7 +93,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 pt-8">
+      {/* <section className="container mx-auto px-4 pt-8">
         <div className="bg-secondary border-2 border-border shadow-shadow rounded-lg p-8 text-center space-y-4">
           <h2 className="text-2xl font-black">Know a great spot?</h2>
           <p className="text-foreground/70 font-medium max-w-md mx-auto">
@@ -104,7 +104,7 @@ export default async function HomePage() {
             Add Your Location
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

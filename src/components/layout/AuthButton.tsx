@@ -43,6 +43,15 @@ export function AuthButton() {
 
   return (
     <div className="hidden md:flex items-center gap-2">
+      <Link href="/map" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+        Map
+      </Link>
+      <Link href="/locations" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
+        Browse
+      </Link>
+      <Link href="/add" className={cn(buttonVariants({ size: "sm" }))}>
+        + Add Location
+      </Link>
       <Link href="/profile" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
         Profile
       </Link>
