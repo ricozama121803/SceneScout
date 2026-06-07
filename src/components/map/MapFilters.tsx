@@ -9,9 +9,10 @@ import { HASHTAG_LIST } from "@/lib/utils/constants";
 
 interface MapFiltersProps {
   onFilterChange: (filters: { search: string; tags: string[] }) => void;
+  onSearch?: () => void;
 }
 
-export function MapFilters({ onFilterChange }: MapFiltersProps) {
+export function MapFilters({ onFilterChange, onSearch }: MapFiltersProps) {
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -19,6 +20,15 @@ export function MapFilters({ onFilterChange }: MapFiltersProps) {
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
     onFilterChange({ search, tags: selectedTags });
+    onSearch?.();
+  }
+
+  const hasActiveFilters = search || selectedTags.length > 0;
+
+  function clearFilters() {
+    setSearch("");
+    setSelectedTags([]);
+    onFilterChange({ search: "", tags: [] });
   }
 
   function toggleTag(name: string) {
@@ -56,6 +66,12 @@ export function MapFilters({ onFilterChange }: MapFiltersProps) {
           <Badge className="h-5 px-1.5 text-xs">{selectedTags.length}</Badge>
         )}
       </Button>
+
+      {hasActiveFilters && (
+        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={clearFilters}>
+          Clear all filters
+        </Button>
+      )}
 
       {showFilters && (
         <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto py-1">

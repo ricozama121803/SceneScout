@@ -18,16 +18,34 @@ export interface Database {
           username: string;
           avatar_url: string | null;
           created_at: string;
+          bio: string | null;
+          show_email: boolean;
+          instagram: string | null;
+          youtube: string | null;
+          linkedin: string | null;
+          website: string | null;
         };
         Insert: {
           id: string;
           username: string;
           avatar_url?: string | null;
           created_at?: string;
+          bio?: string | null;
+          show_email?: boolean;
+          instagram?: string | null;
+          youtube?: string | null;
+          linkedin?: string | null;
+          website?: string | null;
         };
         Update: {
           username?: string;
           avatar_url?: string | null;
+          bio?: string | null;
+          show_email?: boolean;
+          instagram?: string | null;
+          youtube?: string | null;
+          linkedin?: string | null;
+          website?: string | null;
         };
         Relationships: [];
       };

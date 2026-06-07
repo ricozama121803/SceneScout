@@ -231,3 +231,14 @@ create policy "location-photos owner delete"
     bucket_id = 'location-photos'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+-- ============================================================
+-- PROFILE SOCIAL LINKS (migration)
+-- ============================================================
+alter table public.profiles
+  add column if not exists bio          text,
+  add column if not exists show_email   boolean default false,
+  add column if not exists instagram    text,
+  add column if not exists youtube      text,
+  add column if not exists linkedin     text,
+  add column if not exists website      text;

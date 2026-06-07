@@ -43,3 +43,15 @@ export const SignUpSchema = SignInSchema.extend({
 
 export type SignInInput = z.infer<typeof SignInSchema>;
 export type SignUpInput = z.infer<typeof SignUpSchema>;
+
+export const UpdateProfileSchema = z.object({
+  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, and underscores only"),
+  bio: z.string().max(160).optional(),
+  show_email: z.boolean().optional(),
+  instagram: z.string().max(30).optional(),
+  youtube: z.string().max(60).optional(),
+  linkedin: z.string().max(60).optional(),
+  website: z.string().url("Must be a valid URL (include https://)").optional().or(z.literal("")),
+});
+
+export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;

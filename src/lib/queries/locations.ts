@@ -8,11 +8,19 @@ export const getLocations = unstable_cache(
     tag,
     page = 1,
     limit = 12,
+    sort = "newest",
+    minRating,
+    hasAccessibility,
+    hasParking,
   }: {
     search?: string;
     tag?: string;
     page?: number;
     limit?: number;
+    sort?: "newest" | "top_rated" | "most_saved" | "most_rated";
+    minRating?: number;
+    hasAccessibility?: boolean;
+    hasParking?: boolean;
   } = {}): Promise<LocationSummary[]> => {
     const supabase = createPublicClient();
     const offset = (page - 1) * limit;
@@ -22,11 +30,36 @@ export const getLocations = unstable_cache(
       .select(
         `*, location_photos(url, display_order), location_hashtags(hashtag_id, hashtags(id, name))`
       )
-      .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
+    switch (sort) {
+      case "top_rated":
+        query = query.order("avg_rating", { ascending: false }).order("rating_count", { ascending: false });
+        break;
+      case "most_saved":
+        query = query.order("save_count", { ascending: false });
+        break;
+      case "most_rated":
+        query = query.order("rating_count", { ascending: false });
+        break;
+      default:
+        query = query.order("created_at", { ascending: false });
+    }
+
     if (search) {
-      query = query.ilike("name", `%${search}%`);
+      query = query.or(`name.ilike.%${search}%,address.ilike.%${search}%`);
+    }
+
+    if (minRating) {
+      query = query.gte("avg_rating", minRating).gte("rating_count", 1);
+    }
+
+    if (hasAccessibility) {
+      query = query.not("accessibility", "is", null).neq("accessibility", "");
+    }
+
+    if (hasParking) {
+      query = query.not("parking_notes", "is", null).neq("parking_notes", "");
     }
 
     if (tag) {

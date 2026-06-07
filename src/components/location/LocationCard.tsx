@@ -51,7 +51,7 @@ export function LocationCard({ location }: LocationCardProps) {
               <span className="truncate">{location.address}</span>
             </p>
           )}
-          <HashtagBadges hashtags={location.hashtags.slice(0, 3)} />
+          <HashtagBadges hashtags={location.hashtags.slice(0, 3)} linkable={false} />
         </div>
       </article>
     </Link>
