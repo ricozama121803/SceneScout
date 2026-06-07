@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toggleSave } from "@/lib/actions/saves";
 import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,29 +12,31 @@ interface SaveButtonProps {
 }
 
 export function SaveButton({ locationId, initialSaved, isLoggedIn }: SaveButtonProps) {
-  const [, startTransition] = useTransition();
-  const [optimisticSaved, setOptimisticSaved] = useOptimistic(initialSaved);
+  const [pending, startTransition] = useTransition();
+  const [saved, setSaved] = useState(initialSaved);
 
   function handleToggle() {
     if (!isLoggedIn) {
       window.location.href = "/login";
       return;
     }
+    const next = !saved;
+    setSaved(next);
     startTransition(async () => {
-      setOptimisticSaved(!optimisticSaved);
-      await toggleSave(locationId, optimisticSaved);
+      await toggleSave(locationId, saved);
     });
   }
 
   return (
     <Button
-      variant={optimisticSaved ? "default" : "outline"}
+      variant={saved ? "default" : "outline"}
       size="sm"
       onClick={handleToggle}
+      disabled={pending}
       className="gap-2"
     >
-      <Bookmark className={`h-4 w-4 ${optimisticSaved ? "fill-current" : ""}`} />
-      {optimisticSaved ? "Saved" : "Save"}
+      <Bookmark className={`h-4 w-4 ${saved ? "fill-current" : ""}`} />
+      {saved ? "Saved" : "Save"}
     </Button>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import dynamic from "next/dynamic";
+import { Star } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -107,8 +108,42 @@ export function AddLocationForm({ hashtags }: AddLocationFormProps) {
               {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Parking notes</label>
-              <Input placeholder="Free street parking available on weekends" {...register("parking_notes")} />
+              <label className="text-sm font-medium">Parking</label>
+              <div className="space-y-2">
+                <Controller
+                  control={control}
+                  name="parking_score"
+                  render={({ field }) => {
+                    const [hovered, setHovered] = useState(0);
+                    return (
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => field.onChange(field.value === n ? undefined : n)}
+                            onMouseEnter={() => setHovered(n)}
+                            onMouseLeave={() => setHovered(0)}
+                            className="p-0.5 focus:outline-none"
+                          >
+                            <Star
+                              className={`h-5 w-5 transition-colors ${
+                                n <= (hovered || (field.value ?? 0))
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        {field.value != null && (
+                          <span className="ml-1 text-xs text-muted-foreground">{field.value}/5</span>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
+                <Input placeholder="Notes — e.g. free street parking on weekends" {...register("parking_notes")} />
+              </div>
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Permit notes</label>
@@ -116,7 +151,41 @@ export function AddLocationForm({ hashtags }: AddLocationFormProps) {
             </div>
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Accessibility</label>
-              <Input placeholder="Wheelchair accessible via side entrance" {...register("accessibility")} />
+              <div className="space-y-2">
+                <Controller
+                  control={control}
+                  name="accessibility_score"
+                  render={({ field }) => {
+                    const [hovered, setHovered] = useState(0);
+                    return (
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => field.onChange(field.value === n ? undefined : n)}
+                            onMouseEnter={() => setHovered(n)}
+                            onMouseLeave={() => setHovered(0)}
+                            className="p-0.5 focus:outline-none"
+                          >
+                            <Star
+                              className={`h-5 w-5 transition-colors ${
+                                n <= (hovered || (field.value ?? 0))
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        {field.value != null && (
+                          <span className="ml-1 text-xs text-muted-foreground">{field.value}/5</span>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
+                <Input placeholder="Notes — e.g. wheelchair accessible via side entrance" {...register("accessibility")} />
+              </div>
             </div>
           </div>
         )}
@@ -165,13 +234,15 @@ export function AddLocationForm({ hashtags }: AddLocationFormProps) {
               <Controller
                 control={control}
                 name="photo_paths"
-                render={() => (
-                  <PhotoUploadField onChange={(paths) => setValue("photo_paths", paths)} />
+                render={({ field }) => (
+                  <>
+                    <PhotoUploadField onChange={(paths) => setValue("photo_paths", paths)} />
+                    {errors.photo_paths && field.value.length === 0 && (
+                      <p className="text-xs text-destructive">{errors.photo_paths.message}</p>
+                    )}
+                  </>
                 )}
               />
-              {errors.photo_paths && (
-                <p className="text-xs text-destructive">{errors.photo_paths.message}</p>
-              )}
             </div>
 
             <div className="space-y-2">

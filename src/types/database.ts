@@ -61,8 +61,10 @@ export interface Database {
           lng: number;
           address: string | null;
           parking_notes: string | null;
+          parking_score: number | null;
           permit_notes: string | null;
           accessibility: string | null;
+          accessibility_score: number | null;
           avg_rating: number;
           rating_count: number;
           save_count: number;
@@ -76,8 +78,10 @@ export interface Database {
           lng: number;
           address?: string | null;
           parking_notes?: string | null;
+          parking_score?: number | null;
           permit_notes?: string | null;
           accessibility?: string | null;
+          accessibility_score?: number | null;
           created_at?: string;
           updated_at?: string;
           avg_rating?: number;
@@ -91,8 +95,10 @@ export interface Database {
           lng?: number;
           address?: string | null;
           parking_notes?: string | null;
+          parking_score?: number | null;
           permit_notes?: string | null;
           accessibility?: string | null;
+          accessibility_score?: number | null;
           avg_rating?: number;
           rating_count?: number;
           save_count?: number;

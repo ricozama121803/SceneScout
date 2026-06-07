@@ -7,8 +7,10 @@ export const CreateLocationSchema = z.object({
   lat: z.number({ message: "Please pin a location on the map" }),
   lng: z.number({ message: "Please pin a location on the map" }),
   parking_notes: z.string().max(500).optional(),
+  parking_score: z.number().int().min(0).max(5).optional(),
   permit_notes: z.string().max(500).optional(),
   accessibility: z.string().max(500).optional(),
+  accessibility_score: z.number().int().min(0).max(5).optional(),
   hashtag_ids: z.array(z.number()).min(1, "Select at least one hashtag"),
   photo_paths: z.array(z.string()).min(1, "Upload at least one photo"),
 });

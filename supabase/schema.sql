@@ -87,6 +87,7 @@ create table public.hashtags (
 );
 alter table public.hashtags enable row level security;
 create policy "hashtags: public read" on public.hashtags for select using (true);
+create policy "hashtags: auth insert" on public.hashtags for insert to authenticated with check (true);
 
 insert into public.hashtags (name) values
   ('nature'),('desert'),('forest'),('beach'),('urban'),
@@ -231,6 +232,13 @@ create policy "location-photos owner delete"
     bucket_id = 'location-photos'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+-- ============================================================
+-- PARKING & ACCESSIBILITY SCORES (migration)
+-- ============================================================
+alter table public.locations
+  add column if not exists parking_score       int check (parking_score between 0 and 5),
+  add column if not exists accessibility_score int check (accessibility_score between 0 and 5);
 
 -- ============================================================
 -- PROFILE SOCIAL LINKS (migration)

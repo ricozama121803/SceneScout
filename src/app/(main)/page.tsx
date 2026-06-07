@@ -20,7 +20,7 @@ export default async function HomePage() {
             <div className="flex-1 space-y-6 text-center md:text-left">
               <div className="inline-flex items-center gap-2 bg-background border-2 border-border px-4 py-1.5 text-sm font-bold shadow-shadow-sm rounded-sm">
                 <Clapperboard className="h-4 w-4" />
-                Built for student filmmakers
+                Built for student & independent filmmakers and photographers
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">
                 Find Your Perfect<br />

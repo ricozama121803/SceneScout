@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Map, { Marker, NavigationControl } from "react-map-gl/mapbox";
-import type { MapMouseEvent } from "react-map-gl/mapbox";
+import type { MapMouseEvent, MapRef } from "react-map-gl/mapbox";
 import { Button } from "@/components/ui/button";
 import { MapPin, LocateFixed, Loader2 } from "lucide-react";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, MAPBOX_STYLE } from "@/lib/utils/constants";
@@ -33,6 +33,7 @@ async function reverseGeocode(lng: number, lat: number): Promise<string | undefi
 
 export function LocationPickerMap({ value, onChange }: LocationPickerMapProps) {
   const [locating, setLocating] = useState(false);
+  const mapRef = useRef<MapRef>(null);
 
   const handleMapClick = useCallback(
     async (e: MapMouseEvent) => {
@@ -50,6 +51,7 @@ export function LocationPickerMap({ value, onChange }: LocationPickerMapProps) {
       async ({ coords: { latitude: lat, longitude: lng } }) => {
         const address = await reverseGeocode(lng, lat);
         onChange({ lat, lng, address });
+        mapRef.current?.flyTo({ center: [lng, lat], zoom: 14, duration: 1200 });
         setLocating(false);
       },
       () => setLocating(false),
@@ -81,6 +83,7 @@ export function LocationPickerMap({ value, onChange }: LocationPickerMapProps) {
 
       <div className="relative h-72 overflow-hidden rounded-xl border cursor-crosshair">
         <Map
+          ref={mapRef}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           initialViewState={{
             longitude: value?.lng ?? DEFAULT_MAP_CENTER.lng,

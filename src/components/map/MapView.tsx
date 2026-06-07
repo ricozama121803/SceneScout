@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import Map, { NavigationControl, GeolocateControl } from "react-map-gl/mapbox";
+import { useState, useCallback, useRef } from "react";
+import Map, { Marker, NavigationControl, GeolocateControl } from "react-map-gl/mapbox";
+import type { GeolocateControlRef, MapRef } from "react-map-gl/mapbox";
 import useSWR from "swr";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LocationPinMarker } from "./LocationPin";
 import { LocationPopup } from "./LocationPopup";
@@ -26,6 +27,28 @@ export function MapView({ initialPins }: MapViewProps) {
   const [filters, setFilters] = useState({ search: "", tags: [] as string[] });
   const [selectedPin, setSelectedPin] = useState<PopupData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showPhotos, setShowPhotos] = useState(true);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const geolocateRef = useRef<GeolocateControlRef>(null);
+  const mapRef = useRef<MapRef>(null);
+
+  const handleMapLoad = useCallback(() => {
+    navigator.permissions
+      ?.query({ name: "geolocation" as PermissionName })
+      .then((result) => {
+        if (result.state === "granted") {
+          navigator.geolocation.getCurrentPosition(
+            ({ coords }) => {
+              const { latitude: lat, longitude: lng } = coords;
+              setUserLocation({ lat, lng });
+              mapRef.current?.flyTo({ center: [lng, lat], zoom: DEFAULT_MAP_ZOOM, duration: 1400 });
+            },
+            () => {}
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const apiUrl = `/api/locations/pins?search=${encodeURIComponent(filters.search)}&tags=${filters.tags.join(",")}`;
   const { data: features } = useSWR(
@@ -52,6 +75,18 @@ export function MapView({ initialPins }: MapViewProps) {
 
   return (
     <div className="relative h-full w-full">
+      {/* Photo toggle — below filters button on mobile, top-left of map canvas on desktop */}
+      <button
+        type="button"
+        onClick={() => setShowPhotos((v) => !v)}
+        className={`absolute left-3 top-14 z-20 flex items-center justify-center rounded-md border-2 border-border p-1.5 shadow-shadow-sm transition-colors md:top-3 md:left-[calc(20rem+0.75rem)] ${
+          showPhotos ? "bg-primary text-primary-foreground" : "bg-background"
+        }`}
+        aria-label={showPhotos ? "Hide photos" : "Show photos"}
+      >
+        {showPhotos ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+
       {/* Mobile toggle button — hidden on md+ where sidebar is always visible */}
       <button
         type="button"
@@ -67,6 +102,7 @@ export function MapView({ initialPins }: MapViewProps) {
           </span>
         )}
       </button>
+
 
       {/* Mobile backdrop */}
       {sidebarOpen && (
@@ -103,6 +139,7 @@ export function MapView({ initialPins }: MapViewProps) {
       {/* Map — full width on mobile, offset on md+ */}
       <div className="h-full w-full md:pl-80">
         <Map
+          ref={mapRef}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
           initialViewState={{
             longitude: DEFAULT_MAP_CENTER.lng,
@@ -111,16 +148,29 @@ export function MapView({ initialPins }: MapViewProps) {
           }}
           style={{ width: "100%", height: "100%" }}
           mapStyle={MAPBOX_STYLE}
+          onLoad={handleMapLoad}
         >
           <NavigationControl position="top-right" />
-          <GeolocateControl position="top-right" />
+          <GeolocateControl ref={geolocateRef} position="top-right" trackUserLocation showUserHeading />
+
+          {userLocation && (
+            <Marker longitude={userLocation.lng} latitude={userLocation.lat} anchor="center">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute h-8 w-8 rounded-full bg-blue-500/30 animate-ping" />
+                <div className="h-4 w-4 rounded-full bg-blue-500 border-2 border-white shadow-lg" />
+              </div>
+            </Marker>
+          )}
 
           {pins.map((pin) => (
             <LocationPinMarker
               key={pin.id}
               lat={pin.lat}
               lng={pin.lng}
+              name={pin.name}
+              coverPhotoUrl={pin.cover_photo_url}
               isSelected={selectedPin?.id === pin.id}
+              showPhoto={showPhotos}
               onClick={() => setSelectedPin({ ...pin, lng: pin.lng })}
             />
           ))}

@@ -11,7 +11,7 @@ import { CommunityTipForm } from "@/components/location/CommunityTipForm";
 import { CommentList } from "@/components/comment/CommentList";
 import { CommentForm } from "@/components/comment/CommentForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, ParkingCircle, FileText, Accessibility } from "lucide-react";
+import { MapPin, ParkingCircle, FileText, Accessibility, Star } from "lucide-react";
 import { formatDate } from "@/lib/utils/formatters";
 import type { Metadata } from "next";
 
@@ -148,14 +148,27 @@ export default async function LocationPage({
       </div>
 
       {/* Notes grid */}
-      {(location.parking_notes || location.permit_notes || location.accessibility) && (
+      {(location.parking_notes || location.parking_score || location.permit_notes || location.accessibility || location.accessibility_score) && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {location.parking_notes && (
-            <div className="rounded-lg border p-4 space-y-1">
+          {(location.parking_notes || location.parking_score) && (
+            <div className="rounded-lg border p-4 space-y-2">
               <div className="flex items-center gap-2 font-medium text-sm">
                 <ParkingCircle className="h-4 w-4 text-primary" /> Parking
               </div>
-              <p className="text-sm text-muted-foreground">{location.parking_notes}</p>
+              {location.parking_score != null && (
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      className={`h-4 w-4 ${n <= location.parking_score! ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+                    />
+                  ))}
+                  <span className="ml-1 text-xs text-muted-foreground">{location.parking_score}/5</span>
+                </div>
+              )}
+              {location.parking_notes && (
+                <p className="text-sm text-muted-foreground">{location.parking_notes}</p>
+              )}
             </div>
           )}
           {location.permit_notes && (
@@ -166,12 +179,25 @@ export default async function LocationPage({
               <p className="text-sm text-muted-foreground">{location.permit_notes}</p>
             </div>
           )}
-          {location.accessibility && (
-            <div className="rounded-lg border p-4 space-y-1">
+          {(location.accessibility || location.accessibility_score) && (
+            <div className="rounded-lg border p-4 space-y-2">
               <div className="flex items-center gap-2 font-medium text-sm">
                 <Accessibility className="h-4 w-4 text-primary" /> Accessibility
               </div>
-              <p className="text-sm text-muted-foreground">{location.accessibility}</p>
+              {location.accessibility_score != null && (
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      className={`h-4 w-4 ${n <= location.accessibility_score! ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+                    />
+                  ))}
+                  <span className="ml-1 text-xs text-muted-foreground">{location.accessibility_score}/5</span>
+                </div>
+              )}
+              {location.accessibility && (
+                <p className="text-sm text-muted-foreground">{location.accessibility}</p>
+              )}
             </div>
           )}
         </div>

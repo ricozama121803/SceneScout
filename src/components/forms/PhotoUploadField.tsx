@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { getUploadUrl } from "@/lib/actions/photos";
 
 interface PhotoUploadFieldProps {
@@ -74,7 +75,11 @@ export function PhotoUploadField({ onChange, maxFiles = 5 }: PhotoUploadFieldPro
         onDrop={(e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
         onDragOver={(e) => e.preventDefault()}
       >
-        <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+        {uploading ? (
+          <Spinner className="mx-auto mb-2" />
+        ) : (
+          <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+        )}
         <p className="text-sm font-medium">
           {uploading ? "Uploading…" : "Click or drag photos here"}
         </p>
