@@ -82,8 +82,8 @@ export async function deleteLocation(locationId: string) {
   revalidatePath("/locations");
   revalidatePath("/map");
   revalidatePath("/profile");
-  revalidateTag("locations");
-  revalidateTag("location-pins");
+  revalidateTag("locations", "max");
+  revalidateTag("location-pins", "max");
   return { success: true };
 }
 
