@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getLocations } from "@/lib/queries/locations";
-import { getSavedLocations } from "@/lib/queries/user";
+import { getSavedLocations, getUserDrafts } from "@/lib/queries/user";
 import { LocationGrid } from "@/components/location/LocationGrid";
+import { DraftLocationCard } from "@/components/location/DraftLocationCard";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bookmark, MapPin, Globe, Mail } from "lucide-react";
+import { Bookmark, MapPin, Globe, Mail, Camera } from "lucide-react";
 import { InstagramIcon, YoutubeIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import type { Database } from "@/types/database";
 import type { UpdateProfileInput } from "@/types/forms";
@@ -15,7 +16,7 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export const metadata = { title: "My Profile" };
 
-async function ProfileContent() {
+async function ProfileContent({ defaultTab }: { defaultTab: string }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -27,9 +28,10 @@ async function ProfileContent() {
     .single();
   const profile = profileData as Profile | null;
 
-  const [allLocations, savedLocations] = await Promise.all([
+  const [allLocations, savedLocations, drafts] = await Promise.all([
     getLocations({ page: 1, limit: 50 }),
     getSavedLocations(user.id),
+    getUserDrafts(user.id),
   ]);
 
   const myLocations = allLocations.filter((l) => l.user_id === user.id);
@@ -56,12 +58,10 @@ async function ProfileContent() {
       {/* Profile header */}
       <div className="space-y-4">
         <div className="flex items-start gap-4">
-          <Avatar className="h-16 w-16 shrink-0">
-            <AvatarImage src={profile?.avatar_url ?? undefined} />
-            <AvatarFallback className="text-xl">
-              {(profile?.username ?? user.email ?? "?")[0].toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <AvatarUpload
+            currentAvatarUrl={profile?.avatar_url ?? null}
+            username={profile?.username ?? user.email ?? "?"}
+          />
           <div className="min-w-0 space-y-1">
             <h1 className="text-2xl font-bold">{profile?.username ?? "My Profile"}</h1>
             {profile?.bio && (
@@ -133,11 +133,15 @@ async function ProfileContent() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="saved">
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
           <TabsTrigger value="saved" className="gap-2">
             <Bookmark className="h-4 w-4" />
             Saved ({savedLocations.length})
+          </TabsTrigger>
+          <TabsTrigger value="drafts" className="gap-2">
+            <Camera className="h-4 w-4" />
+            Drafts ({drafts.length})
           </TabsTrigger>
           <TabsTrigger value="submitted" className="gap-2">
             <MapPin className="h-4 w-4" />
@@ -152,6 +156,18 @@ async function ProfileContent() {
           />
         </TabsContent>
 
+        <TabsContent value="drafts" className="mt-6">
+          {drafts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {drafts.map((draft) => (
+                <DraftLocationCard key={draft.id} draft={draft} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No drafts yet. Use the camera icon in the nav to quick-save a location.</p>
+          )}
+        </TabsContent>
+
         <TabsContent value="submitted" className="mt-6">
           <LocationGrid
             locations={myLocations}
@@ -163,11 +179,18 @@ async function ProfileContent() {
   );
 }
 
-export default function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
+  const defaultTab = ["saved", "drafts", "submitted"].includes(tab ?? "") ? tab! : "saved";
+
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl">
       <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-xl" />}>
-        <ProfileContent />
+        <ProfileContent defaultTab={defaultTab} />
       </Suspense>
     </div>
   );

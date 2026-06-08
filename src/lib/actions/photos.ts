@@ -19,3 +19,21 @@ export async function getUploadUrl(filename: string) {
 
   return { signedUrl: data.signedUrl, path: storagePath };
 }
+
+export async function getAvatarUploadUrl(filename: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "You must be signed in to upload an avatar" };
+
+  const ext = filename.split(".").pop() ?? "jpg";
+  const storagePath = `avatars/${user.id}.${ext}`;
+
+  const serviceSupabase = createServiceClient();
+  const { data, error } = await serviceSupabase.storage
+    .from("location-photos")
+    .createSignedUploadUrl(storagePath, { upsert: true });
+
+  if (error || !data) return { error: error?.message ?? "Failed to create upload URL" };
+
+  return { signedUrl: data.signedUrl, path: storagePath };
+}

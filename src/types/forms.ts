@@ -57,3 +57,20 @@ export const UpdateProfileSchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+export const UpdateDraftSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  description: z.string().max(1000).optional(),
+  address: z.string().max(200).optional(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  parking_notes: z.string().max(500).optional(),
+  parking_score: z.number().int().min(0).max(5).optional(),
+  permit_notes: z.string().max(500).optional(),
+  accessibility: z.string().max(500).optional(),
+  accessibility_score: z.number().int().min(0).max(5).optional(),
+  hashtag_ids: z.array(z.number()).optional(),
+  photo_paths: z.array(z.string()).optional(),
+});
+
+export type UpdateDraftInput = z.infer<typeof UpdateDraftSchema>;

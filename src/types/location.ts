@@ -22,6 +22,10 @@ export interface LocationWithDetails extends LocationSummary {
   submitted_by: Profile;
 }
 
+export interface DraftSummary extends Location {
+  cover_photo_url: string | null;
+}
+
 // Minimal shape used for map pins (keep the GeoJSON payload small)
 export interface LocationPin {
   id: string;

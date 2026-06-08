@@ -43,3 +43,23 @@ export async function updateProfile(
   revalidateTag("profile", "max");
   return {};
 }
+
+export async function updateAvatarUrl(
+  storagePath: string
+): Promise<{ avatarUrl: string } | { error: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const avatarUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/location-photos/${storagePath}`;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: avatarUrl })
+    .eq("id", user.id);
+
+  if (error) return { error: error.message };
+
+  revalidateTag("profile", "max");
+  return { avatarUrl };
+}

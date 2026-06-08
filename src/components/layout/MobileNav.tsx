@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X, Map, Search, Plus, User } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { QuickSaveModal } from "@/components/layout/QuickSaveModal";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -50,6 +51,7 @@ export function MobileNav() {
                   {label}
                 </Link>
               ))}
+              <QuickSaveModal triggerClassName={cn(buttonVariants({ variant: "ghost" }), "justify-start gap-3 h-12 w-full text-base font-bold")} />
             </div>
           </nav>
         </>

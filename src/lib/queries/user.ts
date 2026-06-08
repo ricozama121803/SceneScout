@@ -1,7 +1,7 @@
 // User-specific queries — these use the auth cookie and are NOT cached with 'use cache'
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
-import type { LocationSummary } from "@/types/location";
+import type { LocationSummary, DraftSummary } from "@/types/location";
 import type { Database } from "@/types/database";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -27,6 +27,7 @@ export const getProfileByUsername = unstable_cache(
       .from("locations")
       .select("*, location_photos(url, display_order), location_hashtags(hashtag_id, hashtags(id, name))")
       .eq("user_id", profile.id)
+      .eq("status", "published")
       .order("created_at", { ascending: false });
 
     const submitted_locations: LocationSummary[] = (locData ?? []).map((loc) => ({
@@ -45,6 +46,24 @@ export const getProfileByUsername = unstable_cache(
   ["profile-by-username"],
   { revalidate: 60 }
 );
+
+export async function getUserDrafts(userId: string): Promise<DraftSummary[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select("*, location_photos(url, display_order)")
+    .eq("user_id", userId)
+    .eq("status", "draft")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((loc) => {
+    const photos = (loc.location_photos as { url: string; display_order: number }[]) ?? [];
+    const cover = photos.sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null;
+    return { ...loc, cover_photo_url: cover };
+  });
+}
 
 export async function getSavedLocations(userId: string): Promise<LocationSummary[]> {
   const supabase = await createClient();

@@ -30,6 +30,7 @@ export const getLocations = unstable_cache(
       .select(
         `*, location_photos(url, display_order), location_hashtags(hashtag_id, hashtags(id, name))`
       )
+      .eq("status", "published")
       .range(offset, offset + limit - 1);
 
     switch (sort) {
@@ -134,7 +135,7 @@ export const getLocationById = unstable_cache(
     };
   },
   ["location-by-id"],
-  { revalidate: 60 }
+  { tags: ["locations", "location-by-id"], revalidate: 60 }
 );
 
 export const getTrending = unstable_cache(
@@ -143,6 +144,7 @@ export const getTrending = unstable_cache(
     const { data, error } = await supabase
       .from("locations")
       .select(`*, location_photos(url, display_order), location_hashtags(hashtag_id, hashtags(id, name))`)
+      .eq("status", "published")
       .order("save_count", { ascending: false })
       .limit(limit);
 
@@ -168,6 +170,7 @@ export const getTopRated = unstable_cache(
     const { data, error } = await supabase
       .from("locations")
       .select(`*, location_photos(url, display_order), location_hashtags(hashtag_id, hashtags(id, name))`)
+      .eq("status", "published")
       .gte("rating_count", 1)
       .order("avg_rating", { ascending: false })
       .limit(limit);
@@ -193,7 +196,8 @@ export const getLocationPins = unstable_cache(
     const supabase = createPublicClient();
     let query = supabase
       .from("locations")
-      .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)");
+      .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)")
+      .eq("status", "published");
 
     if (params?.search) {
       query = query.ilike("name", `%${params.search}%`);

@@ -12,7 +12,8 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("locations")
-    .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)");
+    .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)")
+    .eq("status", "published");
 
   if (search) {
     query = query.ilike("name", `%${search}%`);

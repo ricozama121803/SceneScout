@@ -250,3 +250,20 @@ alter table public.profiles
   add column if not exists youtube      text,
   add column if not exists linkedin     text,
   add column if not exists website      text;
+
+-- ============================================================
+-- DRAFT STATUS (run in Supabase SQL Editor)
+-- ============================================================
+alter table public.locations
+  add column if not exists status text not null default 'published'
+    check (status in ('draft', 'published')),
+  add column if not exists published_at timestamptz;
+
+update public.locations set published_at = created_at where published_at is null and status = 'published';
+
+drop policy if exists "locations: public read" on public.locations;
+create policy "locations: read" on public.locations
+  for select using (
+    status = 'published'
+    or auth.uid() = user_id
+  );

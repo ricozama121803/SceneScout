@@ -6,18 +6,19 @@ import { Upload, X } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { getUploadUrl } from "@/lib/actions/photos";
 
-interface PhotoUploadFieldProps {
-  onChange: (paths: string[]) => void;
-  maxFiles?: number;
-}
-
 interface UploadedPhoto {
   path: string;
   previewUrl: string;
 }
 
-export function PhotoUploadField({ onChange, maxFiles = 5 }: PhotoUploadFieldProps) {
-  const [photos, setPhotos] = useState<UploadedPhoto[]>([]);
+interface PhotoUploadFieldProps {
+  onChange: (paths: string[]) => void;
+  maxFiles?: number;
+  initialPhotos?: UploadedPhoto[];
+}
+
+export function PhotoUploadField({ onChange, maxFiles = 5, initialPhotos = [] }: PhotoUploadFieldProps) {
+  const [photos, setPhotos] = useState<UploadedPhoto[]>(initialPhotos);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);

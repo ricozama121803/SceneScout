@@ -68,6 +68,8 @@ export interface Database {
           avg_rating: number;
           rating_count: number;
           save_count: number;
+          status: 'draft' | 'published';
+          published_at: string | null;
         };
         Insert: {
           id?: string;
@@ -87,6 +89,8 @@ export interface Database {
           avg_rating?: number;
           rating_count?: number;
           save_count?: number;
+          status?: 'draft' | 'published';
+          published_at?: string | null;
         };
         Update: {
           name?: string;
@@ -103,6 +107,8 @@ export interface Database {
           rating_count?: number;
           save_count?: number;
           updated_at?: string;
+          status?: 'draft' | 'published';
+          published_at?: string | null;
         };
         Relationships: [
           {
