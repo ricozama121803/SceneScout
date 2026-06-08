@@ -267,3 +267,48 @@ create policy "locations: read" on public.locations
     status = 'published'
     or auth.uid() = user_id
   );
+
+-- ============================================================
+-- RENTAL LISTINGS (migration — run in Supabase SQL Editor)
+-- ============================================================
+create table if not exists public.rental_listings (
+  id            uuid primary key default gen_random_uuid(),
+  owner_id      uuid not null references public.profiles(id) on delete cascade,
+  name          text not null,
+  description   text not null,
+  address       text not null,
+  lat           double precision not null,
+  lng           double precision not null,
+  price_per_hour numeric(10,2),
+  price_per_day  numeric(10,2),
+  amenities     text,
+  rules         text,
+  status        text not null default 'draft' check (status in ('draft','published')),
+  published_at  timestamptz,
+  created_at    timestamptz default now(),
+  updated_at    timestamptz default now()
+);
+alter table public.rental_listings enable row level security;
+create policy "rental_listings: read" on public.rental_listings
+  for select using (status = 'published' or auth.uid() = owner_id);
+create policy "rental_listings: auth insert" on public.rental_listings
+  for insert with check (auth.uid() = owner_id);
+create policy "rental_listings: owner update" on public.rental_listings
+  for update using (auth.uid() = owner_id);
+create policy "rental_listings: owner delete" on public.rental_listings
+  for delete using (auth.uid() = owner_id);
+
+create table if not exists public.rental_photos (
+  id            uuid primary key default gen_random_uuid(),
+  listing_id    uuid not null references public.rental_listings(id) on delete cascade,
+  storage_path  text not null,
+  url           text not null,
+  display_order int default 0,
+  created_at    timestamptz default now()
+);
+alter table public.rental_photos enable row level security;
+create policy "rental_photos: public read" on public.rental_photos for select using (true);
+create policy "rental_photos: owner insert" on public.rental_photos for insert
+  with check (auth.uid() = (select owner_id from public.rental_listings where id = listing_id));
+create policy "rental_photos: owner delete" on public.rental_photos for delete
+  using (auth.uid() = (select owner_id from public.rental_listings where id = listing_id));

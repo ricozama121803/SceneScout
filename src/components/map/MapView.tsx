@@ -8,9 +8,12 @@ import { SlidersHorizontal, X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LocationPinMarker } from "./LocationPin";
 import { LocationPopup } from "./LocationPopup";
+import { RentalPinMarker } from "./RentalPinMarker";
+import { RentalPopup } from "./RentalPopup";
 import { MapFilters } from "./MapFilters";
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, MAPBOX_STYLE } from "@/lib/utils/constants";
 import type { LocationPin } from "@/types/location";
+import type { RentalPin } from "@/types/rental";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 interface PopupData extends LocationPin {
@@ -19,14 +22,16 @@ interface PopupData extends LocationPin {
 
 interface MapViewProps {
   initialPins: LocationPin[];
+  initialRentalPins: RentalPin[];
   currentUserId: string | null;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.features ?? []);
 
-export function MapView({ initialPins, currentUserId }: MapViewProps) {
+export function MapView({ initialPins, initialRentalPins, currentUserId }: MapViewProps) {
   const [filters, setFilters] = useState({ search: "", tags: [] as string[], hideMyLocations: false });
   const [selectedPin, setSelectedPin] = useState<PopupData | null>(null);
+  const [selectedRentalPin, setSelectedRentalPin] = useState<(RentalPin & { lng: number }) | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPhotos, setShowPhotos] = useState(true);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -177,12 +182,29 @@ export function MapView({ initialPins, currentUserId }: MapViewProps) {
               coverPhotoUrl={pin.cover_photo_url}
               isSelected={selectedPin?.id === pin.id}
               showPhoto={showPhotos}
-              onClick={() => setSelectedPin({ ...pin, lng: pin.lng })}
+              onClick={() => { setSelectedRentalPin(null); setSelectedPin({ ...pin, lng: pin.lng }); }}
+            />
+          ))}
+
+          {initialRentalPins.map((pin) => (
+            <RentalPinMarker
+              key={pin.id}
+              lat={pin.lat}
+              lng={pin.lng}
+              name={pin.name}
+              coverPhotoUrl={pin.cover_photo_url}
+              isSelected={selectedRentalPin?.id === pin.id}
+              showPhoto={showPhotos}
+              onClick={() => { setSelectedPin(null); setSelectedRentalPin({ ...pin, lng: pin.lng }); }}
             />
           ))}
 
           {selectedPin && (
             <LocationPopup data={selectedPin} onClose={() => setSelectedPin(null)} />
+          )}
+
+          {selectedRentalPin && (
+            <RentalPopup data={selectedRentalPin} onClose={() => setSelectedRentalPin(null)} />
           )}
         </Map>
       </div>

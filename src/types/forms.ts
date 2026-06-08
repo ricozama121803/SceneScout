@@ -58,6 +58,21 @@ export const UpdateProfileSchema = z.object({
 
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
 
+export const CreateRentalListingSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  description: z.string().min(10, "Description must be at least 10 characters").max(1000),
+  address: z.string().min(3, "Please enter an address").max(200),
+  lat: z.number({ message: "Please pin a location on the map" }),
+  lng: z.number({ message: "Please pin a location on the map" }),
+  price_per_hour: z.number().positive("Must be a positive number").optional(),
+  price_per_day: z.number().positive("Must be a positive number").optional(),
+  amenities: z.string().max(500).optional(),
+  rules: z.string().max(500).optional(),
+  photo_paths: z.array(z.string()).min(1, "Upload at least one photo"),
+});
+
+export type CreateRentalListingInput = z.infer<typeof CreateRentalListingSchema>;
+
 export const UpdateDraftSchema = z.object({
   name: z.string().min(2).max(100).optional(),
   description: z.string().max(1000).optional(),

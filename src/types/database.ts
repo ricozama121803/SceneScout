@@ -342,6 +342,95 @@ export interface Database {
           }
         ];
       };
+      rental_listings: {
+        Row: {
+          id: string;
+          owner_id: string;
+          name: string;
+          description: string;
+          address: string;
+          lat: number;
+          lng: number;
+          price_per_hour: number | null;
+          price_per_day: number | null;
+          amenities: string | null;
+          rules: string | null;
+          status: 'draft' | 'published';
+          published_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          name: string;
+          description: string;
+          address: string;
+          lat: number;
+          lng: number;
+          price_per_hour?: number | null;
+          price_per_day?: number | null;
+          amenities?: string | null;
+          rules?: string | null;
+          status?: 'draft' | 'published';
+          published_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string;
+          address?: string;
+          lat?: number;
+          lng?: number;
+          price_per_hour?: number | null;
+          price_per_day?: number | null;
+          amenities?: string | null;
+          rules?: string | null;
+          status?: 'draft' | 'published';
+          published_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rental_listings_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      rental_photos: {
+        Row: {
+          id: string;
+          listing_id: string;
+          storage_path: string;
+          url: string;
+          display_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          listing_id: string;
+          storage_path: string;
+          url: string;
+          display_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          display_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rental_photos_listing_id_fkey";
+            columns: ["listing_id"];
+            isOneToOne: false;
+            referencedRelation: "rental_listings";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]?: {
