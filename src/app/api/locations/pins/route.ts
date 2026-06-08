@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("locations")
-    .select("id, lat, lng, name, avg_rating, location_photos(url, display_order)");
+    .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)");
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       return {
         type: "Feature" as const,
         geometry: { type: "Point" as const, coordinates: [pin.lng, pin.lat] },
-        properties: { id: pin.id, name: pin.name, avg_rating: pin.avg_rating, cover_photo_url: cover },
+        properties: { id: pin.id, user_id: pin.user_id, name: pin.name, avg_rating: pin.avg_rating, cover_photo_url: cover },
       };
     }),
   };

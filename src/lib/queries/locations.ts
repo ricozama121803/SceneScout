@@ -193,7 +193,7 @@ export const getLocationPins = unstable_cache(
     const supabase = createPublicClient();
     let query = supabase
       .from("locations")
-      .select("id, lat, lng, name, avg_rating, location_photos(url, display_order)");
+      .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)");
 
     if (params?.search) {
       query = query.ilike("name", `%${params.search}%`);
@@ -205,7 +205,7 @@ export const getLocationPins = unstable_cache(
     return data.map((loc) => {
       const photos = (loc.location_photos as { url: string; display_order: number }[]) ?? [];
       const cover = photos.sort((a, b) => a.display_order - b.display_order)[0]?.url ?? null;
-      return { id: loc.id, lat: loc.lat, lng: loc.lng, name: loc.name, avg_rating: loc.avg_rating, cover_photo_url: cover };
+      return { id: loc.id, user_id: loc.user_id, lat: loc.lat, lng: loc.lng, name: loc.name, avg_rating: loc.avg_rating, cover_photo_url: cover };
     });
   },
   ["location-pins"],

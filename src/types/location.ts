@@ -25,6 +25,7 @@ export interface LocationWithDetails extends LocationSummary {
 // Minimal shape used for map pins (keep the GeoJSON payload small)
 export interface LocationPin {
   id: string;
+  user_id: string;
   lat: number;
   lng: number;
   name: string;

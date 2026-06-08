@@ -19,12 +19,13 @@ interface PopupData extends LocationPin {
 
 interface MapViewProps {
   initialPins: LocationPin[];
+  currentUserId: string | null;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.features ?? []);
 
-export function MapView({ initialPins }: MapViewProps) {
-  const [filters, setFilters] = useState({ search: "", tags: [] as string[] });
+export function MapView({ initialPins, currentUserId }: MapViewProps) {
+  const [filters, setFilters] = useState({ search: "", tags: [] as string[], hideMyLocations: false });
   const [selectedPin, setSelectedPin] = useState<PopupData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPhotos, setShowPhotos] = useState(true);
@@ -57,9 +58,10 @@ export function MapView({ initialPins }: MapViewProps) {
     { fallbackData: [] }
   );
 
-  const pins: LocationPin[] = filters.search || filters.tags.length
-    ? (features?.map((f: { properties: { id: string; name: string; avg_rating: number; cover_photo_url: string | null }; geometry: { coordinates: [number, number] } }) => ({
+  const rawPins: LocationPin[] = filters.search || filters.tags.length
+    ? (features?.map((f: { properties: { id: string; user_id: string; name: string; avg_rating: number; cover_photo_url: string | null }; geometry: { coordinates: [number, number] } }) => ({
         id: f.properties.id,
+        user_id: f.properties.user_id,
         name: f.properties.name,
         avg_rating: f.properties.avg_rating,
         cover_photo_url: f.properties.cover_photo_url ?? null,
@@ -68,8 +70,12 @@ export function MapView({ initialPins }: MapViewProps) {
       })) ?? [])
     : initialPins;
 
+  const pins = filters.hideMyLocations && currentUserId
+    ? rawPins.filter((p) => p.user_id !== currentUserId)
+    : rawPins;
+
   const handleFilterChange = useCallback(
-    (newFilters: { search: string; tags: string[] }) => setFilters(newFilters),
+    (newFilters: { search: string; tags: string[]; hideMyLocations: boolean }) => setFilters(newFilters),
     []
   );
 
@@ -96,9 +102,9 @@ export function MapView({ initialPins }: MapViewProps) {
       >
         <SlidersHorizontal className="h-4 w-4" />
         Filters
-        {(filters.tags.length > 0 || filters.search) && (
+        {(filters.tags.length > 0 || filters.search || filters.hideMyLocations) && (
           <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold">
-            {filters.tags.length + (filters.search ? 1 : 0)}
+            {filters.tags.length + (filters.search ? 1 : 0) + (filters.hideMyLocations ? 1 : 0)}
           </span>
         )}
       </button>
@@ -132,7 +138,7 @@ export function MapView({ initialPins }: MapViewProps) {
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <MapFilters onFilterChange={handleFilterChange} onSearch={() => setSidebarOpen(false)} />
+        <MapFilters isLoggedIn={!!currentUserId} onFilterChange={handleFilterChange} onSearch={() => setSidebarOpen(false)} />
         <p className="text-xs text-muted-foreground">{pins.length} location{pins.length !== 1 ? "s" : ""} shown</p>
       </div>
 

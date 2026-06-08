@@ -12,6 +12,6 @@ const MapView = dynamic(() => import("./MapView").then((m) => m.MapView), {
   ),
 });
 
-export function MapLoader({ initialPins }: { initialPins: LocationPin[] }) {
-  return <MapView initialPins={initialPins} />;
+export function MapLoader({ initialPins, currentUserId }: { initialPins: LocationPin[]; currentUserId: string | null }) {
+  return <MapView initialPins={initialPins} currentUserId={currentUserId} />;
 }

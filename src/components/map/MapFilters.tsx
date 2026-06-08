@@ -7,28 +7,41 @@ import { Button } from "@/components/ui/button";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { HASHTAG_LIST } from "@/lib/utils/constants";
 
+interface Filters {
+  search: string;
+  tags: string[];
+  hideMyLocations: boolean;
+}
+
 interface MapFiltersProps {
-  onFilterChange: (filters: { search: string; tags: string[] }) => void;
+  isLoggedIn: boolean;
+  onFilterChange: (filters: Filters) => void;
   onSearch?: () => void;
 }
 
-export function MapFilters({ onFilterChange, onSearch }: MapFiltersProps) {
+export function MapFilters({ isLoggedIn, onFilterChange, onSearch }: MapFiltersProps) {
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [hideMyLocations, setHideMyLocations] = useState(false);
+
+  function emit(overrides: Partial<Filters> = {}) {
+    onFilterChange({ search, tags: selectedTags, hideMyLocations, ...overrides });
+  }
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onFilterChange({ search, tags: selectedTags });
+    emit();
     onSearch?.();
   }
 
-  const hasActiveFilters = search || selectedTags.length > 0;
+  const hasActiveFilters = search || selectedTags.length > 0 || hideMyLocations;
 
   function clearFilters() {
     setSearch("");
     setSelectedTags([]);
-    onFilterChange({ search: "", tags: [] });
+    setHideMyLocations(false);
+    onFilterChange({ search: "", tags: [], hideMyLocations: false });
   }
 
   function toggleTag(name: string) {
@@ -36,7 +49,13 @@ export function MapFilters({ onFilterChange, onSearch }: MapFiltersProps) {
       ? selectedTags.filter((t) => t !== name)
       : [...selectedTags, name];
     setSelectedTags(newTags);
-    onFilterChange({ search, tags: newTags });
+    emit({ tags: newTags });
+  }
+
+  function toggleHideMyLocations() {
+    const next = !hideMyLocations;
+    setHideMyLocations(next);
+    emit({ hideMyLocations: next });
   }
 
   return (
@@ -67,12 +86,6 @@ export function MapFilters({ onFilterChange, onSearch }: MapFiltersProps) {
         )}
       </Button>
 
-      {hasActiveFilters && (
-        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={clearFilters}>
-          Clear all filters
-        </Button>
-      )}
-
       {showFilters && (
         <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto py-1">
           {HASHTAG_LIST.map((tag) => (
@@ -86,6 +99,25 @@ export function MapFilters({ onFilterChange, onSearch }: MapFiltersProps) {
             </button>
           ))}
         </div>
+      )}
+
+      {isLoggedIn && (
+        <button
+          type="button"
+          onClick={toggleHideMyLocations}
+          className="flex w-full items-center justify-between rounded-md border-2 border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+        >
+          Hide my locations
+          <span className={`h-4 w-8 rounded-full border-2 border-border transition-colors flex items-center px-0.5 ${hideMyLocations ? "bg-primary" : "bg-muted"}`}>
+            <span className={`h-2.5 w-2.5 rounded-full bg-white border border-border transition-transform ${hideMyLocations ? "translate-x-3" : "translate-x-0"}`} />
+          </span>
+        </button>
+      )}
+
+      {hasActiveFilters && (
+        <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={clearFilters}>
+          Clear all filters
+        </Button>
       )}
     </div>
   );

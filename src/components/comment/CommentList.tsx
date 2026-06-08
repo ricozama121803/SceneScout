@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/utils/formatters";
 import type { Comment, Profile } from "@/types/location";
@@ -15,13 +16,17 @@ export function CommentList({ comments }: CommentListProps) {
     <div className="space-y-4">
       {comments.map((comment) => (
         <div key={comment.id} className="flex gap-3">
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage src={comment.profile.avatar_url ?? undefined} />
-            <AvatarFallback>{comment.profile.username[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <Link href={`/users/${comment.profile.username}`}>
+            <Avatar className="h-8 w-8 shrink-0 hover:opacity-80 transition-opacity">
+              <AvatarImage src={comment.profile.avatar_url ?? undefined} />
+              <AvatarFallback>{comment.profile.username[0].toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="flex-1 space-y-1">
             <div className="flex items-baseline gap-2">
-              <span className="text-sm font-medium">{comment.profile.username}</span>
+              <Link href={`/users/${comment.profile.username}`} className="text-sm font-medium hover:underline">
+                {comment.profile.username}
+              </Link>
               <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
             </div>
             <p className="text-sm text-foreground/80">{comment.content}</p>

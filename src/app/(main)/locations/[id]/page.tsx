@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getLocationById } from "@/lib/queries/locations";
 import { PhotoGallery } from "@/components/location/PhotoGallery";
 import { HashtagBadges } from "@/components/location/HashtagBadges";
 import { StarRating } from "@/components/location/StarRating";
 import { SaveButton } from "@/components/location/SaveButton";
+import { DeleteLocationButton } from "@/components/location/DeleteLocationButton";
 import { CommunityTipCard } from "@/components/location/CommunityTipCard";
 import { CommunityTipForm } from "@/components/location/CommunityTipForm";
 import { CommentList } from "@/components/comment/CommentList";
@@ -89,6 +91,14 @@ async function UserCommentSection({ locationId }: { locationId: string }) {
   );
 }
 
+async function OwnerActions({ locationId, ownerId }: { locationId: string; ownerId: string | null }) {
+  if (!ownerId) return null;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || user.id !== ownerId) return null;
+  return <DeleteLocationButton locationId={locationId} />;
+}
+
 async function UserTipSection({ locationId }: { locationId: string }) {
   const { isLoggedIn } = await UserPanel({ locationId });
   if (!isLoggedIn) return null;
@@ -116,9 +126,14 @@ export default async function LocationPage({
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-bold">{location.name}</h1>
-          <Suspense fallback={<div className="h-8 w-20 rounded-md bg-muted animate-pulse" />}>
-            <UserSaveButton locationId={id} />
-          </Suspense>
+          <div className="flex items-center gap-2 shrink-0">
+            <Suspense fallback={null}>
+              <OwnerActions locationId={id} ownerId={location.user_id} />
+            </Suspense>
+            <Suspense fallback={<div className="h-8 w-20 rounded-md bg-muted animate-pulse" />}>
+              <UserSaveButton locationId={id} />
+            </Suspense>
+          </div>
         </div>
         {location.address && (
           <p className="text-muted-foreground flex items-center gap-1.5">
@@ -231,12 +246,18 @@ export default async function LocationPage({
 
       {/* Submitted by */}
       <div className="flex items-center gap-3 pt-4 border-t text-sm text-muted-foreground">
-        <Avatar className="h-7 w-7">
-          <AvatarImage src={location.submitted_by?.avatar_url ?? undefined} />
-          <AvatarFallback>{location.submitted_by?.username?.[0]?.toUpperCase()}</AvatarFallback>
-        </Avatar>
+        <Link href={`/users/${location.submitted_by?.username}`}>
+          <Avatar className="h-7 w-7 hover:opacity-80 transition-opacity">
+            <AvatarImage src={location.submitted_by?.avatar_url ?? undefined} />
+            <AvatarFallback>{location.submitted_by?.username?.[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Link>
         <span>
-          Added by <strong>{location.submitted_by?.username}</strong> on {formatDate(location.created_at)}
+          Added by{" "}
+          <Link href={`/users/${location.submitted_by?.username}`} className="font-bold hover:underline">
+            {location.submitted_by?.username}
+          </Link>{" "}
+          on {formatDate(location.created_at)}
         </span>
       </div>
     </div>

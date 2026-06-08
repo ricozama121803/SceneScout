@@ -80,8 +80,11 @@ export async function deleteLocation(locationId: string) {
   if (error) return { error: error.message };
 
   revalidatePath("/locations");
+  revalidatePath("/map");
   revalidatePath("/profile");
-  redirect("/locations");
+  revalidateTag("locations");
+  revalidateTag("location-pins");
+  return { success: true };
 }
 
 type CreateLocationInput = import("@/types/forms").CreateLocationInput;

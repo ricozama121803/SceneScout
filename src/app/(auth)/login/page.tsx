@@ -1,6 +1,6 @@
 import { signIn, signInWithOAuth } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/forms/SubmitButton";
 import Link from "next/link";
 import { MapPin, ArrowLeft } from "lucide-react";
 
@@ -71,9 +71,7 @@ export default async function LoginPage({
                 required
               />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Sign In
-            </Button>
+            <SubmitButton label="Sign In" loadingLabel="Signing in…" className="w-full" size="lg" />
           </form>
 
           {/* <div className="relative"> */}

@@ -1,6 +1,6 @@
 import { signUp } from "@/lib/actions/auth";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SubmitButton } from "@/components/forms/SubmitButton";
 import Link from "next/link";
 import { MapPin, ArrowLeft } from "lucide-react";
 
@@ -80,9 +80,7 @@ export default async function SignUpPage({
                 required
               />
             </div>
-            <Button type="submit" className="w-full" size="lg">
-              Create Account
-            </Button>
+            <SubmitButton label="Create Account" loadingLabel="Creating account…" className="w-full" size="lg" />
           </form>
         </div>
 
