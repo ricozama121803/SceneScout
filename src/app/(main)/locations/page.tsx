@@ -4,6 +4,9 @@ import { LocationGrid } from "@/components/location/LocationGrid";
 import { LocationFilters } from "@/components/location/LocationFilters";
 import { getLocations } from "@/lib/queries/locations";
 import { Spinner } from "@/components/ui/spinner";
+import { createClient } from "@/lib/supabase/server";
+import { GuestWall } from "@/components/guest/GuestWall";
+import { AuthPromptModal } from "@/components/guest/AuthPromptModal";
 
 export const metadata = { title: "Browse Locations" };
 
@@ -24,7 +27,12 @@ export default async function LocationsPage({
     await searchParams;
   const currentPage = Number(page) || 1;
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isGuest = !user;
+
   const locations = await getLocations({
+    ...(isGuest ? { limit: 6 } : {}),
     search,
     tag,
     page: currentPage,
@@ -69,7 +77,10 @@ export default async function LocationsPage({
         }
       />
 
-      {locations.length === 12 && (
+      {isGuest && <GuestWall />}
+      {isGuest && <AuthPromptModal />}
+
+      {!isGuest && locations.length === 12 && (
         <div className="flex justify-center gap-3 pt-4">
           {currentPage > 1 && (
             <Link
@@ -87,6 +98,7 @@ export default async function LocationsPage({
           </Link>
         </div>
       )}
+
     </div>
   );
 }

@@ -192,15 +192,16 @@ export const getTopRated = unstable_cache(
 );
 
 export const getLocationPins = unstable_cache(
-  async (params?: { search?: string; tags?: string[] }): Promise<LocationPin[]> => {
+  async (params?: { search?: string; tags?: string[]; limit?: number }): Promise<LocationPin[]> => {
     const supabase = createPublicClient();
     let query = supabase
       .from("locations")
       .select("id, user_id, lat, lng, name, avg_rating, location_photos(url, display_order)")
-      .eq("status", "published");
+      .eq("status", "published")
+      .limit(params?.limit ?? 1000);
 
     if (params?.search) {
-      query = query.ilike("name", `%${params.search}%`);
+      query = query.or(`name.ilike.%${params.search}%,address.ilike.%${params.search}%`);
     }
 
     const { data, error } = await query;

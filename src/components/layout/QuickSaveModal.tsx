@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, MapPin, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { PhotoUploadField } from "@/components/forms/PhotoUploadField";
 import { quickSaveLocation } from "@/lib/actions/locations";
@@ -17,10 +17,12 @@ type GpsState = "idle" | "requesting" | "granted" | "denied";
 
 interface QuickSaveModalProps {
   triggerClassName?: string;
+  isLoggedIn?: boolean;
 }
 
-export function QuickSaveModal({ triggerClassName }: QuickSaveModalProps) {
+export function QuickSaveModal({ triggerClassName, isLoggedIn = true }: QuickSaveModalProps) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState<"form" | "auth-prompt">("form");
   const [gpsState, setGpsState] = useState<GpsState>("idle");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoPaths, setPhotoPaths] = useState<string[]>([]);
@@ -42,6 +44,7 @@ export function QuickSaveModal({ triggerClassName }: QuickSaveModalProps) {
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) {
+      setStep("form");
       setGpsState("idle");
       setCoords(null);
       setPhotoPaths([]);
@@ -51,6 +54,10 @@ export function QuickSaveModal({ triggerClassName }: QuickSaveModalProps) {
   }
 
   function handleSubmit() {
+    if (!isLoggedIn) {
+      setStep("auth-prompt");
+      return;
+    }
     if (!coords) { setError("Location access is required. Please enable GPS and retry."); return; }
     if (photoPaths.length === 0) { setError("Please upload at least one photo."); return; }
     setError(null);
@@ -88,6 +95,28 @@ export function QuickSaveModal({ triggerClassName }: QuickSaveModalProps) {
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-sm">
+          {step === "auth-prompt" ? (
+            <>
+              <DialogHeader>
+                <DialogTitle>Sign in to save</DialogTitle>
+                <DialogDescription>
+                  Create a free account to save locations and fill in the details later.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex-col sm:flex-col">
+                <Button className="w-full" onClick={() => router.push("/signup")}>
+                  Sign Up Free
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => router.push("/login")}>
+                  Sign In
+                </Button>
+                <DialogClose render={<Button variant="ghost" className="w-full" />}>
+                  Cancel
+                </DialogClose>
+              </DialogFooter>
+            </>
+          ) : (
+          <>
           <DialogHeader>
             <DialogTitle>Quick Save Location</DialogTitle>
             <DialogDescription>
@@ -148,6 +177,8 @@ export function QuickSaveModal({ triggerClassName }: QuickSaveModalProps) {
               {isPending ? "Saving…" : "Save Draft"}
             </Button>
           </DialogFooter>
+          </>
+          )}
         </DialogContent>
       </Dialog>
     </>

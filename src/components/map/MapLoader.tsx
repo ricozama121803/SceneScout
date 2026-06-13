@@ -13,6 +13,6 @@ const MapView = dynamic(() => import("./MapView").then((m) => m.MapView), {
   ),
 });
 
-export function MapLoader({ initialPins, initialRentalPins, currentUserId }: { initialPins: LocationPin[]; initialRentalPins: RentalPin[]; currentUserId: string | null }) {
-  return <MapView initialPins={initialPins} initialRentalPins={initialRentalPins} currentUserId={currentUserId} />;
+export function MapLoader({ initialPins, initialRentalPins, currentUserId, isAuthenticated }: { initialPins: LocationPin[]; initialRentalPins: RentalPin[]; currentUserId: string | null; isAuthenticated: boolean }) {
+  return <MapView initialPins={initialPins} initialRentalPins={initialRentalPins} currentUserId={currentUserId} isAuthenticated={isAuthenticated} />;
 }

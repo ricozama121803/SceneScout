@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     .eq("status", "published");
 
   if (search) {
-    query = query.ilike("name", `%${search}%`);
+    query = query.or(`name.ilike.%${search}%,address.ilike.%${search}%`);
   }
 
   if (tags?.length) {

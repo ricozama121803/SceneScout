@@ -52,13 +52,19 @@ export const getRentalListingById = unstable_cache(
 );
 
 export const getRentalPins = unstable_cache(
-  async (): Promise<RentalPin[]> => {
+  async (params?: { search?: string }): Promise<RentalPin[]> => {
     const supabase = createPublicClient();
-    const { data } = await supabase
+    let query = supabase
       .from("rental_listings")
       .select("id, owner_id, lat, lng, name, price_per_hour, price_per_day, rental_photos(url, display_order)")
       .eq("status", "published")
       .limit(1000);
+
+    if (params?.search) {
+      query = query.or(`name.ilike.%${params.search}%,address.ilike.%${params.search}%`);
+    }
+
+    const { data } = await query;
 
     if (!data) return [];
 

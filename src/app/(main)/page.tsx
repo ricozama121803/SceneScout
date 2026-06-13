@@ -3,6 +3,7 @@ import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LocationGrid } from "@/components/location/LocationGrid";
+import { CyclingText } from "@/components/ui/CyclingText";
 import { getTrending, getTopRated } from "@/lib/queries/locations";
 import { MapPin, Plus, TrendingUp, Star, Clapperboard } from "lucide-react";
 
@@ -24,7 +25,7 @@ export default async function HomePage() {
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter leading-none">
                 Find Your Perfect<br />
-                <span className="text-primary">Filming Location</span>
+                <CyclingText />
               </h1>
               <p className="text-foreground/70 text-lg max-w-md font-medium">
                 Discover community-curated filming spots near you. Filter by hashtags, read tips from

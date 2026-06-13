@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Map, { Marker, NavigationControl, GeolocateControl } from "react-map-gl/mapbox";
 import type { MapRef } from "react-map-gl/mapbox";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
 import { SlidersHorizontal, X, Eye, EyeOff } from "lucide-react";
+import { AuthPromptModal } from "@/components/guest/AuthPromptModal";
 import { Button } from "@/components/ui/button";
 import { LocationPinMarker } from "./LocationPin";
 import { LocationPopup } from "./LocationPopup";
@@ -24,12 +26,19 @@ interface MapViewProps {
   initialPins: LocationPin[];
   initialRentalPins: RentalPin[];
   currentUserId: string | null;
+  isAuthenticated?: boolean;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.features ?? []);
 
-export function MapView({ initialPins, initialRentalPins, currentUserId }: MapViewProps) {
+export function MapView({ initialPins, initialRentalPins, currentUserId, isAuthenticated = true }: MapViewProps) {
+  const router = useRouter();
   const [filters, setFilters] = useState({ search: "", tags: [] as string[], hideMyLocations: false });
+  const [mapBlurred, setMapBlurred] = useState(() =>
+    !isAuthenticated && typeof window !== "undefined"
+      ? sessionStorage.getItem("map-blurred") === "1"
+      : false
+  );
   const [selectedPin, setSelectedPin] = useState<PopupData | null>(null);
   const [selectedRentalPin, setSelectedRentalPin] = useState<(RentalPin & { lng: number }) | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,6 +46,19 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const geolocateRef = useRef<React.ElementRef<typeof GeolocateControl>>(null);
   const mapRef = useRef<MapRef>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      sessionStorage.removeItem("map-blurred");
+      return;
+    }
+    if (sessionStorage.getItem("map-blurred") === "1") return;
+    const t = setTimeout(() => {
+      setMapBlurred(true);
+      sessionStorage.setItem("map-blurred", "1");
+    }, 30_000);
+    return () => clearTimeout(t);
+  }, [isAuthenticated]);
 
   const handleMapLoad = useCallback(() => {
     navigator.permissions
@@ -56,14 +78,15 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
       .catch(() => {});
   }, []);
 
-  const apiUrl = `/api/locations/pins?search=${encodeURIComponent(filters.search)}&tags=${filters.tags.join(",")}`;
-  const { data: features } = useSWR(
-    filters.search || filters.tags.length ? apiUrl : null,
-    fetcher,
-    { fallbackData: [] }
-  );
+  const hasFilter = !!(filters.search || filters.tags.length);
 
-  const rawPins: LocationPin[] = filters.search || filters.tags.length
+  const apiUrl = `/api/locations/pins?search=${encodeURIComponent(filters.search)}&tags=${filters.tags.join(",")}`;
+  const { data: features } = useSWR(hasFilter ? apiUrl : null, fetcher, { fallbackData: [] });
+
+  const rentalApiUrl = `/api/rentals/pins?search=${encodeURIComponent(filters.search)}`;
+  const { data: rentalFeatures } = useSWR(filters.search ? rentalApiUrl : null, fetcher, { fallbackData: [] });
+
+  const rawPins: LocationPin[] = hasFilter
     ? (features?.map((f: { properties: { id: string; user_id: string; name: string; avg_rating: number; cover_photo_url: string | null }; geometry: { coordinates: [number, number] } }) => ({
         id: f.properties.id,
         user_id: f.properties.user_id,
@@ -74,6 +97,19 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
         lat: f.geometry.coordinates[1],
       })) ?? [])
     : initialPins;
+
+  const rentalPins: RentalPin[] = filters.search
+    ? (rentalFeatures?.map((f: { properties: { id: string; owner_id: string; name: string; price_per_hour: number | null; price_per_day: number | null; cover_photo_url: string | null }; geometry: { coordinates: [number, number] } }) => ({
+        id: f.properties.id,
+        owner_id: f.properties.owner_id,
+        name: f.properties.name,
+        price_per_hour: f.properties.price_per_hour,
+        price_per_day: f.properties.price_per_day,
+        cover_photo_url: f.properties.cover_photo_url ?? null,
+        lng: f.geometry.coordinates[0],
+        lat: f.geometry.coordinates[1],
+      })) ?? [])
+    : initialRentalPins;
 
   const pins = filters.hideMyLocations && currentUserId
     ? rawPins.filter((p) => p.user_id !== currentUserId)
@@ -147,8 +183,10 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
         <p className="text-xs text-muted-foreground">{pins.length} location{pins.length !== 1 ? "s" : ""} shown</p>
       </div>
 
+      {!isAuthenticated && <AuthPromptModal />}
+
       {/* Map — full width on mobile, offset on md+ */}
-      <div className="h-full w-full md:pl-80">
+      <div className="relative h-full w-full md:pl-80">
         <Map
           ref={mapRef}
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
@@ -186,7 +224,7 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
             />
           ))}
 
-          {initialRentalPins.map((pin) => (
+          {rentalPins.map((pin) => (
             <RentalPinMarker
               key={pin.id}
               lat={pin.lat}
@@ -207,6 +245,19 @@ export function MapView({ initialPins, initialRentalPins, currentUserId }: MapVi
             <RentalPopup data={selectedRentalPin} onClose={() => setSelectedRentalPin(null)} />
           )}
         </Map>
+        {mapBlurred && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 backdrop-blur-md bg-black/40">
+            <p className="text-white font-bold text-lg">Sign in to keep exploring</p>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => router.push("/login")}>
+                Sign In
+              </Button>
+              <Button onClick={() => router.push("/signup")}>
+                Sign Up Free
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

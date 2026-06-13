@@ -29,13 +29,11 @@ export function NavLinks() {
       <Link href="/locations" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>
         Browse
       </Link>
+      <QuickSaveModal isLoggedIn={loggedIn} />
       {loggedIn && (
-        <>
-          <QuickSaveModal />
-          <Link href="/add" className={cn(buttonVariants({ size: "sm" }))}>
-            + Add Location
-          </Link>
-        </>
+        <Link href="/add" className={cn(buttonVariants({ size: "sm" }))}>
+          + Add Location
+        </Link>
       )}
 
       {/* Business — visually separated */}

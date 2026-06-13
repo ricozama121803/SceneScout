@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { getRentalPins } from "@/lib/queries/rentals";
 
-export async function GET() {
-  const pins = await getRentalPins();
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search") ?? undefined;
+
+  const pins = await getRentalPins(search ? { search } : undefined);
 
   const geojson = {
     type: "FeatureCollection",
