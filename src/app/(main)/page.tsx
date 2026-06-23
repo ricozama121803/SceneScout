@@ -61,16 +61,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Stats strip */}
-      <div className="border-b-2 border-border bg-primary">
-        <div className="container mx-auto px-4 py-3 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-bold text-primary-foreground">
-          <span>🎬 Community-curated spots</span>
-          <span>📍 Drop-pin location adding</span>
-          <span>⭐ Filmmaker reviews &amp; tips</span>
-          <span>🔖 Save your favourites</span>
-        </div>
-      </div>
-
       {/* Trending */}
       <section className="container mx-auto px-4 pt-12 pb-4">
         <div className="flex items-center justify-between mb-6">

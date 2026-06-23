@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X, Map, Search, Plus, User, Store } from "lucide-react";
+import { Menu, X, Map, Search, Plus, User } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { QuickSaveModal } from "@/components/layout/QuickSaveModal";
 import { createClient } from "@/lib/supabase/client";
@@ -65,23 +65,7 @@ export function MobileNav() {
                 </>
               )}
 
-              {/* Spaces for rent — labeled section */}
-              <div className="mt-2 pt-2 border-t-2 border-emerald-300">
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-3 pb-1.5 flex items-center gap-1.5">
-                  <Store className="h-3 w-3" />
-                  Spaces for Rent
-                </p>
-                <Link href="/rentals" onClick={close} className={cn(buttonVariants({ variant: "ghost" }), "justify-start gap-3 h-12 w-full text-base font-bold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800")}>
-                  <Store className="h-5 w-5" />
-                  Rent a Space
-                </Link>
-                {loggedIn && (
-                  <Link href="/business" onClick={close} className={cn(buttonVariants({ variant: "ghost" }), "justify-start gap-3 h-12 w-full text-base font-bold text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800")}>
-                    <Store className="h-5 w-5" />
-                    My Spaces
-                  </Link>
-                )}
-              </div>
+
 
             </div>
           </nav>

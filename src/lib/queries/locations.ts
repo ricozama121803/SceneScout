@@ -1,5 +1,5 @@
 import { unstable_cache } from "next/cache";
-import { createPublicClient } from "@/lib/supabase/server";
+import { createPublicClient, createClient } from "@/lib/supabase/server";
 import type { LocationSummary, LocationWithDetails, LocationPin } from "@/types/location";
 
 export const getLocations = unstable_cache(
@@ -137,6 +137,42 @@ export const getLocationById = unstable_cache(
   ["location-by-id"],
   { tags: ["locations", "location-by-id"], revalidate: 60 }
 );
+
+const LOCATION_DETAIL_SELECT = `*,
+  location_photos(*),
+  location_hashtags(hashtag_id, hashtags(id, name)),
+  community_tips(*, profiles(id, username, avatar_url)),
+  comments(*, profiles(id, username, avatar_url)),
+  profiles!locations_user_id_fkey(id, username, avatar_url)`;
+
+function shapeLocationDetail(data: Record<string, unknown>): LocationWithDetails {
+  const photos = (data.location_photos as LocationWithDetails["photos"]) ?? [];
+  return {
+    ...data,
+    cover_photo_url: photos.sort((a: { display_order: number }, b: { display_order: number }) => a.display_order - b.display_order)[0]?.url ?? null,
+    hashtags:
+      (data.location_hashtags as { hashtags: { id: number; name: string } }[])
+        ?.map((lh) => lh.hashtags)
+        .filter(Boolean) ?? [],
+    photos,
+    tips: (data.community_tips as unknown as LocationWithDetails["tips"]) ?? [],
+    comments: (data.comments as unknown as LocationWithDetails["comments"]) ?? [],
+    submitted_by: data.profiles as unknown as LocationWithDetails["submitted_by"],
+  } as LocationWithDetails;
+}
+
+export async function getDraftLocationByIdForOwner(id: string, userId: string): Promise<LocationWithDetails | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("locations")
+    .select(LOCATION_DETAIL_SELECT)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .eq("status", "draft")
+    .single();
+  if (error || !data) return null;
+  return shapeLocationDetail(data as Record<string, unknown>);
+}
 
 export const getTrending = unstable_cache(
   async (limit = 6): Promise<LocationSummary[]> => {

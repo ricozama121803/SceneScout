@@ -53,6 +53,64 @@ export async function createLocation(formData: CreateLocationInput) {
   redirect(`/locations/${location.id}`);
 }
 
+export async function republishLocation(locationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: location } = await supabase
+    .from("locations")
+    .select("user_id")
+    .eq("id", locationId)
+    .single();
+
+  if (!location || location.user_id !== user.id) return { error: "Not authorized" };
+
+  const { error } = await supabase
+    .from("locations")
+    .update({ status: "published", published_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", locationId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/locations");
+  revalidatePath("/map");
+  revalidatePath("/profile");
+  revalidateTag("locations", "max");
+  revalidateTag("location-pins", "max");
+  revalidateTag("location-by-id", "max");
+  return { success: true };
+}
+
+export async function setLocationDraft(locationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: location } = await supabase
+    .from("locations")
+    .select("user_id")
+    .eq("id", locationId)
+    .single();
+
+  if (!location || location.user_id !== user.id) return { error: "Not authorized" };
+
+  const { error } = await supabase
+    .from("locations")
+    .update({ status: "draft", published_at: null, updated_at: new Date().toISOString() })
+    .eq("id", locationId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/locations");
+  revalidatePath("/map");
+  revalidatePath("/profile");
+  revalidateTag("locations", "max");
+  revalidateTag("location-pins", "max");
+  revalidateTag("location-by-id", "max");
+  return { success: true };
+}
+
 export async function deleteLocation(locationId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

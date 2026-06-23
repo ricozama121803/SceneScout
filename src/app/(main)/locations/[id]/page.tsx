@@ -2,12 +2,14 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLocationById } from "@/lib/queries/locations";
+import { getLocationById, getDraftLocationByIdForOwner } from "@/lib/queries/locations";
 import { PhotoGallery } from "@/components/location/PhotoGallery";
 import { HashtagBadges } from "@/components/location/HashtagBadges";
 import { StarRating } from "@/components/location/StarRating";
 import { SaveButton } from "@/components/location/SaveButton";
 import { DeleteLocationButton } from "@/components/location/DeleteLocationButton";
+import { UnpublishLocationButton } from "@/components/location/UnpublishLocationButton";
+import { RepublishLocationButton } from "@/components/location/RepublishLocationButton";
 import { CommunityTipCard } from "@/components/location/CommunityTipCard";
 import { CommunityTipForm } from "@/components/location/CommunityTipForm";
 import { CommentList } from "@/components/comment/CommentList";
@@ -91,12 +93,19 @@ async function UserCommentSection({ locationId }: { locationId: string }) {
   );
 }
 
-async function OwnerActions({ locationId, ownerId }: { locationId: string; ownerId: string | null }) {
+async function OwnerActions({ locationId, ownerId, status }: { locationId: string; ownerId: string | null; status: string }) {
   if (!ownerId) return null;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user || user.id !== ownerId) return null;
-  return <DeleteLocationButton locationId={locationId} />;
+  return (
+    <div className="flex items-center gap-2">
+      {status === "published"
+        ? <UnpublishLocationButton locationId={locationId} />
+        : <RepublishLocationButton locationId={locationId} />}
+      <DeleteLocationButton locationId={locationId} />
+    </div>
+  );
 }
 
 async function UserTipSection({ locationId }: { locationId: string }) {
@@ -116,19 +125,40 @@ export default async function LocationPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const location = await getLocationById(id);
+  let location = await getLocationById(id);
+  let isDraft = false;
+
+  if (!location) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const draft = await getDraftLocationByIdForOwner(id, user.id);
+      if (draft) {
+        location = draft;
+        isDraft = true;
+      }
+    }
+  }
 
   if (!location) notFound();
 
   return (
     <div className="container mx-auto px-4 py-10 max-w-4xl space-y-10">
+      {isDraft && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3 text-sm">
+          <div>
+            <p className="font-bold text-amber-900">This location is in draft mode</p>
+            <p className="text-amber-700">Only you can see it. Use the Re-publish button to make it public again.</p>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-3xl font-bold">{location.name}</h1>
           <div className="flex items-center gap-2 shrink-0">
             <Suspense fallback={null}>
-              <OwnerActions locationId={id} ownerId={location.user_id} />
+              <OwnerActions locationId={id} ownerId={location.user_id} status={location.status} />
             </Suspense>
             <Suspense fallback={<div className="h-8 w-20 rounded-md bg-muted animate-pulse" />}>
               <UserSaveButton locationId={id} />

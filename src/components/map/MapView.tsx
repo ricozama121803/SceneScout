@@ -24,14 +24,14 @@ interface PopupData extends LocationPin {
 
 interface MapViewProps {
   initialPins: LocationPin[];
-  initialRentalPins: RentalPin[];
+  initialRentalPins?: RentalPin[];
   currentUserId: string | null;
   isAuthenticated?: boolean;
 }
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.features ?? []);
 
-export function MapView({ initialPins, initialRentalPins, currentUserId, isAuthenticated = true }: MapViewProps) {
+export function MapView({ initialPins, initialRentalPins = [], currentUserId, isAuthenticated = true }: MapViewProps) {
   const router = useRouter();
   const [filters, setFilters] = useState({ search: "", tags: [] as string[], hideMyLocations: false });
   const [mapBlurred, setMapBlurred] = useState(() =>
