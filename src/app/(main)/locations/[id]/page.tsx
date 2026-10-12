@@ -15,7 +15,9 @@ import { CommunityTipForm } from "@/components/location/CommunityTipForm";
 import { CommentList } from "@/components/comment/CommentList";
 import { CommentForm } from "@/components/comment/CommentForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, ParkingCircle, FileText, Accessibility, Star } from "lucide-react";
+import { MapPin, ParkingCircle, FileText, Accessibility, Star, Store } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/utils/formatters";
 import type { Metadata } from "next";
 
@@ -100,6 +102,13 @@ async function OwnerActions({ locationId, ownerId, status }: { locationId: strin
   if (!user || user.id !== ownerId) return null;
   return (
     <div className="flex items-center gap-2">
+      <Link
+        href={`/business/listings/new?from=${locationId}`}
+        className={cn(buttonVariants({ size: "sm", variant: "outline" }), "gap-1.5 border-emerald-500 text-emerald-700 hover:bg-emerald-50")}
+      >
+        <Store className="h-3.5 w-3.5" />
+        List for rent
+      </Link>
       {status === "published"
         ? <UnpublishLocationButton locationId={locationId} />
         : <RepublishLocationButton locationId={locationId} />}
@@ -112,10 +121,7 @@ async function UserTipSection({ locationId }: { locationId: string }) {
   const { isLoggedIn } = await UserPanel({ locationId });
   if (!isLoggedIn) return null;
   return (
-    <div className="rounded-lg border p-4 space-y-3">
-      <h3 className="text-sm font-semibold">Share your tip</h3>
-      <CommunityTipForm locationId={locationId} />
-    </div>
+    <CommunityTipForm locationId={locationId} />
   );
 }
 

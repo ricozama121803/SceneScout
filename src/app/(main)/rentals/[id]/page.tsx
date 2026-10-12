@@ -5,6 +5,8 @@ import { getRentalListingById } from "@/lib/queries/rentals";
 import { buttonVariants } from "@/components/ui/button";
 import { MapPin, DollarSign, Store, ArrowLeft, CheckSquare, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
+import { BookingRequestForm } from "@/components/rental/BookingRequestForm";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,6 +26,10 @@ export default async function RentalListingPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const listing = await getRentalListingById(id);
   if (!listing) notFound();
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isOwner = user?.id === listing.owner.id;
 
   const price = formatPrice(listing.price_per_hour, listing.price_per_day);
   const coverPhoto = listing.photos[0]?.url ?? null;
@@ -131,20 +137,24 @@ export default async function RentalListingPage({ params }: { params: Promise<{ 
               </Link>
             </div>
 
-            {/* Booking CTA — placeholder */}
+            {/* Booking */}
             <div className="border-t-2 border-border pt-4 space-y-3">
-              <div className="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-200 rounded-lg p-3">
-                <CheckSquare className="h-4 w-4 text-emerald-600 shrink-0" />
-                <p className="text-xs text-emerald-700 font-medium">
-                  Payments &amp; booking coming soon. Reach out to the owner directly to arrange your shoot.
-                </p>
-              </div>
-              <Link
-                href={`/users/${listing.owner.username}`}
-                className={cn(buttonVariants(), "w-full bg-emerald-500 hover:bg-emerald-600")}
-              >
-                View Owner Profile
-              </Link>
+              {isOwner ? (
+                <p className="text-xs text-muted-foreground">This is your listing. Booking requests appear on your dashboard.</p>
+              ) : !user ? (
+                <Link
+                  href={`/login?next=/rentals/${listing.id}`}
+                  className={cn(buttonVariants(), "w-full bg-emerald-500 hover:bg-emerald-600")}
+                >
+                  Sign in to book
+                </Link>
+              ) : (
+                <BookingRequestForm
+                  listingId={listing.id}
+                  pricePerHour={listing.price_per_hour}
+                  pricePerDay={listing.price_per_day}
+                />
+              )}
             </div>
           </div>
         </div>

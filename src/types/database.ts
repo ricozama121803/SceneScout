@@ -24,6 +24,8 @@ export interface Database {
           youtube: string | null;
           linkedin: string | null;
           website: string | null;
+          stripe_account_id: string | null;
+          stripe_onboarded: boolean;
         };
         Insert: {
           id: string;
@@ -36,6 +38,8 @@ export interface Database {
           youtube?: string | null;
           linkedin?: string | null;
           website?: string | null;
+          stripe_account_id?: string | null;
+          stripe_onboarded?: boolean;
         };
         Update: {
           username?: string;
@@ -46,6 +50,8 @@ export interface Database {
           youtube?: string | null;
           linkedin?: string | null;
           website?: string | null;
+          stripe_account_id?: string | null;
+          stripe_onboarded?: boolean;
         };
         Relationships: [];
       };
@@ -427,6 +433,61 @@ export interface Database {
             columns: ["listing_id"];
             isOneToOne: false;
             referencedRelation: "rental_listings";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      rental_bookings: {
+        Row: {
+          id: string;
+          listing_id: string;
+          renter_id: string;
+          start_time: string;
+          end_time: string;
+          total_price: number;
+          platform_fee: number;
+          message: string | null;
+          status: "pending" | "approved" | "declined" | "cancelled" | "completed";
+          stripe_payment_intent_id: string | null;
+          payout_status: "pending" | "paid";
+          stripe_transfer_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          listing_id: string;
+          renter_id: string;
+          start_time: string;
+          end_time: string;
+          total_price: number;
+          platform_fee: number;
+          message?: string | null;
+          status?: "pending" | "approved" | "declined" | "cancelled" | "completed";
+          stripe_payment_intent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          payout_status?: "pending" | "paid";
+          stripe_transfer_id?: string | null;
+          status?: "pending" | "approved" | "declined" | "cancelled" | "completed";
+          stripe_payment_intent_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "rental_bookings_listing_id_fkey";
+            columns: ["listing_id"];
+            isOneToOne: false;
+            referencedRelation: "rental_listings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rental_bookings_renter_id_fkey";
+            columns: ["renter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           }
         ];

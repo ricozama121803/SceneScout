@@ -36,3 +36,22 @@ export interface RentalPin {
   price_per_hour: number | null;
   price_per_day: number | null;
 }
+
+export type BookingStatus = "pending" | "approved" | "declined" | "cancelled" | "completed";
+
+export interface RentalBooking {
+  id: string;
+  listing_id: string;
+  renter_id: string;
+  start_time: string;
+  end_time: string;
+  total_price: number;
+  platform_fee: number;
+  message: string | null;
+  status: BookingStatus;
+  stripe_payment_intent_id: string | null;
+  payout_status: "pending" | "paid";
+  stripe_transfer_id: string | null;
+  created_at: string;
+  updated_at: string;
+}

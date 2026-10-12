@@ -2,7 +2,7 @@
 
 The dummy rental marketplace is live. Listings can be created, published, and discovered on the map and browse page. Owners have a dashboard at `/business`. What's missing is money moving.
 
-This document covers exactly what to build to go from "contact the owner" to "renter pays, owner gets 97%, SceneScout keeps 3%."
+This document covers exactly what to build to go from "contact the owner" to "renter pays, owner gets 90%, SceneScout keeps 10%."
 
 ---
 
@@ -52,7 +52,7 @@ Add to `.env.local`:
 STRIPE_SECRET_KEY=sk_live_...           # or sk_test_... during dev
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-PLATFORM_FEE_PERCENT=3
+PLATFORM_FEE_PERCENT=10
 ```
 
 In the Stripe dashboard:
@@ -201,7 +201,7 @@ export async function requestBooking(input: {
 }): Promise<{ booking_id: string } | { error: string }> {
   // 1. Auth check
   // 2. Fetch listing to get owner's stripe_account_id and price
-  // 3. Calculate total_price and platform_fee (3%)
+  // 3. Calculate total_price and platform_fee (PLATFORM_FEE_PERCENT, 10%)
   // 4. Create Stripe PaymentIntent:
   //      capture_method: "manual"
   //      application_fee_amount: platform_fee in cents

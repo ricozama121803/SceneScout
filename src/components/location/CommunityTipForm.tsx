@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { upsertTip } from "@/lib/actions/tips";
 import { CommunityTipSchema, type CommunityTipInput } from "@/types/forms";
+import { Lightbulb } from "lucide-react";
 import { NOISE_LEVELS, CROWD_LEVELS, PERMIT_REQS } from "@/lib/utils/constants";
 
 interface CommunityTipFormProps {
@@ -17,6 +18,7 @@ interface CommunityTipFormProps {
 export function CommunityTipForm({ locationId }: CommunityTipFormProps) {
   const [, startTransition] = useTransition();
   const [submitted, setSubmitted] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<CommunityTipInput>({
     resolver: zodResolver(CommunityTipSchema),
@@ -34,8 +36,18 @@ export function CommunityTipForm({ locationId }: CommunityTipFormProps) {
     return <p className="text-sm text-muted-foreground">Thanks for sharing your tip!</p>;
   }
 
+  if (!open) {
+    return (
+      <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
+        <Lightbulb className="h-3.5 w-3.5" />
+        Write a tip
+      </Button>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 rounded-lg border p-4">
+      <h3 className="text-sm font-semibold">Share your tip</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Best filming time</label>
@@ -88,7 +100,10 @@ export function CommunityTipForm({ locationId }: CommunityTipFormProps) {
         <p className="text-sm text-destructive">Please fix the errors above</p>
       )}
 
-      <Button type="submit" size="sm">Submit Tip</Button>
+      <div className="flex items-center gap-2">
+        <Button type="submit" size="sm">Submit Tip</Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
+      </div>
     </form>
   );
 }

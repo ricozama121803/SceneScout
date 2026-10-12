@@ -312,3 +312,52 @@ create policy "rental_photos: owner insert" on public.rental_photos for insert
   with check (auth.uid() = (select owner_id from public.rental_listings where id = listing_id));
 create policy "rental_photos: owner delete" on public.rental_photos for delete
   using (auth.uid() = (select owner_id from public.rental_listings where id = listing_id));
+
+-- ============================================================
+-- PAYMENTS: Stripe Connect + bookings (migration — run in Supabase SQL Editor)
+-- ============================================================
+alter table public.profiles
+  add column if not exists stripe_account_id text,
+  add column if not exists stripe_onboarded  boolean not null default false;
+
+create table if not exists public.rental_bookings (
+  id                       uuid primary key default gen_random_uuid(),
+  listing_id               uuid not null references public.rental_listings(id) on delete cascade,
+  renter_id                uuid not null references public.profiles(id) on delete cascade,
+  start_time               timestamptz not null,
+  end_time                 timestamptz not null,
+  total_price              numeric(10,2) not null,
+  platform_fee             numeric(10,2) not null,
+  message                  text,
+  status                   text not null default 'pending'
+                             check (status in ('pending','approved','declined','cancelled','completed')),
+  stripe_payment_intent_id text,
+  created_at               timestamptz default now(),
+  updated_at               timestamptz default now(),
+  check (end_time > start_time)
+);
+create index if not exists rental_bookings_listing_idx on public.rental_bookings (listing_id, start_time);
+create index if not exists rental_bookings_renter_idx  on public.rental_bookings (renter_id);
+
+alter table public.rental_bookings enable row level security;
+
+create policy "bookings: renter read" on public.rental_bookings
+  for select using (auth.uid() = renter_id);
+create policy "bookings: owner read" on public.rental_bookings
+  for select using (
+    auth.uid() = (select owner_id from public.rental_listings where id = listing_id)
+  );
+create policy "bookings: renter insert" on public.rental_bookings
+  for insert with check (auth.uid() = renter_id);
+create policy "bookings: owner update" on public.rental_bookings
+  for update using (
+    auth.uid() = (select owner_id from public.rental_listings where id = listing_id)
+  );
+
+-- ============================================================
+-- PAYMENTS: pay-first, onboard-later (migration — run in Supabase SQL Editor)
+-- ============================================================
+alter table public.rental_bookings
+  add column if not exists payout_status text not null default 'pending'
+    check (payout_status in ('pending','paid')),
+  add column if not exists stripe_transfer_id text;

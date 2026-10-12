@@ -22,7 +22,12 @@ const LocationPickerMap = dynamic(
 
 const STEPS = ["Details & Pricing", "Location", "Photos"] as const;
 
-export function AddRentalListingForm() {
+interface AddRentalListingFormProps {
+  /** Prefill from an existing community location. */
+  initial?: Pick<CreateRentalListingInput, "name" | "description" | "address" | "lat" | "lng">;
+}
+
+export function AddRentalListingForm({ initial }: AddRentalListingFormProps) {
   const [step, setStep] = useState(0);
   const [pending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -37,7 +42,7 @@ export function AddRentalListingForm() {
     formState: { errors },
   } = useForm<CreateRentalListingInput>({
     resolver: zodResolver(CreateRentalListingSchema),
-    defaultValues: { photo_paths: [] },
+    defaultValues: { photo_paths: [], ...initial },
   });
 
   const watchedLat = watch("lat");
