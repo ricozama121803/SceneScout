@@ -2,7 +2,7 @@
 
 ## Before the live demo
 
-- [ ] Set Stripe env vars on the host (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PLATFORM_FEE_PERCENT=10`, `NEXT_PUBLIC_SITE_URL` set to the live URL)
+- [x] Set Stripe env vars on the host (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PLATFORM_FEE_PERCENT=10`, `NEXT_PUBLIC_SITE_URL` set to the live URL)
 - [ ] Register a webhook endpoint in the Stripe sandbox at `https://<live-site>/api/webhooks/stripe` for `payment_intent.payment_failed`, `payment_intent.canceled` and `account.updated` (Connect events). Put its `whsec_...` in the host's `STRIPE_WEBHOOK_SECRET`
 - [ ] Supabase Auth: set Site URL and add the live URL to Redirect URLs so confirmation emails stop pointing at `localhost`
 - [ ] Run both payment migrations from `supabase/schema.sql` (done locally; confirm on any other database)
